@@ -5,18 +5,59 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:FileConverter"
         mc:Ignorable="d"
-        Title="File Converter" Height="450" Width="800"
+        Title="File Converter" Height="300" Width="400"
         Background="LightGray"
         ResizeMode="NoResize"
         WindowStartupLocation="CenterScreen">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width ="*"/>
+            <ColumnDefinition Width ="*"/>
         </Grid.ColumnDefinitions>
-        <Button Background="White" 
+        <Button Content="Datei suchen" 
+                Background="White" 
                 Command="{Binding BrowseCommand}"
-                Content="Button" 
                 HorizontalAlignment="Left" 
-                VerticalAlignment="Top" Width="230" Margin="100,280,0,0" Height="80"/>
+                VerticalAlignment="Top" 
+                Width="100" 
+                Margin="50,226,0,0" 
+                Height="30" 
+                RenderTransformOrigin="0.458,0.422"/>
+        <ComboBox ItemsSource="{Binding Formats}"
+                  SelectedItem="{Binding Formats.Current, Mode=TwoWay}"
+                  HorizontalAlignment="Left" 
+                  Visibility="{Binding Visibility}"
+                  Margin="50,94,0,0" 
+                  VerticalAlignment="Top" 
+                  Width="100" 
+                  Grid.Column="1" 
+                  Height="30" />
+        <Label Content="Zielformat auswählen" 
+               HorizontalContentAlignment="Center"
+               Visibility="{Binding Visibility}"
+               Margin="35,68,35,0" 
+               VerticalAlignment="Top" 
+               Grid.Column="1"/>
+        <Button Content="Konvertieren" 
+                Command="{Binding ConvertCommand}"
+                HorizontalAlignment="Left" 
+                Height="30" 
+                Margin="50,183,0,0" 
+                VerticalAlignment="Top" 
+                Width="100" 
+                Grid.Column="1"/>
+        <TextBox Text="{Binding FileName}"
+                 HorizontalAlignment="Left"
+                 Height="203" 
+                 Margin="10,10,0,0" 
+                 TextWrapping="Wrap"  
+                 VerticalAlignment="Top" 
+                 Width="177"/>
+        <Label Content="© 2020 Lukas Hecke" 
+               HorizontalAlignment="Left" 
+               Height="24" 
+               Margin="66,237,0,0" 
+               VerticalAlignment="Top" 
+               Width="121" Grid.Column="1"/>
     </Grid>
 </Window>

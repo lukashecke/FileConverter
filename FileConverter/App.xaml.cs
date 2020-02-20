@@ -21,10 +21,10 @@ namespace FileConverter
                 Window mainWindow = new MainWindow();
                 mainWindow.Show();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 // Unbehandelte Exceptions abfangen
-                MessageBox.Show("Programm konnte aufgrund einer unbehandelten Exception nicht gestartet werden!", "Absturz");
+                MessageBox.Show("Programm konnte aufgrund einer unbehandelten Exception nicht gestartet werden!"+Environment.NewLine+ex.Message, "Absturz");
             }
         }
     }

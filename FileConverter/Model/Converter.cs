@@ -16,7 +16,7 @@ namespace FileConverter.Model
         private static string savingPath = $@"C:\Users\{Environment.UserName.ToString().ToLower()}\Desktop";
         private static BitmapEncoder encoder;
 
-        // TODO using wenn datei zum konvertieren benutzen sonst blockiert!!!!!
+        
 
         /// <summary>
         /// 
@@ -29,10 +29,12 @@ namespace FileConverter.Model
              * Windows Presentation Foundation (WPF) systemeigene Unterstützung für die Komprimierung und die decokomprimierung von Images von 
              * Bitmap (BMP), 
              * Graphics Interchange Format (GIF), 
-             * Joint Photographics Experts Group (GIF), 
+             * Joint Photographics Experts Group (JIF), 
              * Portable Network Graphics (PNG) und 
              * Tagged Image File Format (TIFF).
              */
+
+            // TODO using wenn datei zum konvertieren benutzen sonst blockiert!!!!!
             string fileName = Path.GetFileNameWithoutExtension(filePath);
             string fullName = Path.Combine(savingPath, fileName + "." + format.ToLower());
 

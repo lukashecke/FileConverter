@@ -14,7 +14,6 @@ namespace FileConverter
             this.DataContext = new MainWindowViewModel();
             InitializeComponent();
         }
-
     }
 }
 

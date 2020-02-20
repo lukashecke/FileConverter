@@ -68,6 +68,7 @@
     </Compile>
     <Compile Include="Commands\RelayCommand.cs" />
     <Compile Include="Model\Converter.cs" />
+    <Compile Include="Model\ObservableCollectionEx.cs" />
     <Compile Include="ViewModel\MainWindowViewModel.cs" />
     <Compile Include="ViewModel\ViewModelBase.cs" />
     <Compile Include="View\MainWindow.xaml.cs">
@@ -102,6 +103,8 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Resource Include="Images\Testbild.jpg" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
