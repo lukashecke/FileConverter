@@ -33,7 +33,7 @@ namespace FileConverter.ViewModel
                 // file = File.ReadAllText(openFileDialog.FileName);
                 filePath = openFileDialog.FileName;
             }
-            Model.Converter.ImageToJPG(filePath);
+            Model.Converter.Convert(filePath, "jpg");
         }
 
 
