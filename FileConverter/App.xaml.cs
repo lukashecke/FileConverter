@@ -13,5 +13,19 @@ namespace FileConverter
     /// </summary>
     public partial class App : Application
     {
+        protected override void OnStartup(StartupEventArgs e)
+        {
+            try
+            {
+                // Einstiegspunkt des Programms
+                Window mainWindow = new MainWindow();
+                mainWindow.Show();
+            }
+            catch (Exception)
+            {
+                // Unbehandelte Exceptions abfangen
+                MessageBox.Show("Programm konnte aufgrund einer unbehandelten Exception nicht gestartet werden!", "Absturz");
+            }
+        }
     }
 }
