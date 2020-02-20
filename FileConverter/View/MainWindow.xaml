@@ -10,6 +10,13 @@
         ResizeMode="NoResize"
         WindowStartupLocation="CenterScreen">
     <Grid>
-        
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width ="*"/>
+        </Grid.ColumnDefinitions>
+        <Button Background="White" 
+                Command="{Binding BrowseCommand}"
+                Content="Button" 
+                HorizontalAlignment="Left" 
+                VerticalAlignment="Top" Width="230" Margin="100,280,0,0" Height="80"/>
     </Grid>
 </Window>
