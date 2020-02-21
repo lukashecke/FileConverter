@@ -16,7 +16,7 @@ namespace FileConverter.ViewModel
 
     public class MainWindowViewModel : ViewModelBase
     {
-        private string filePath;
+        private string[] filePaths;
         public ICommand BrowseCommand
         {
             get; set;
@@ -60,21 +60,21 @@ namespace FileConverter.ViewModel
                 this.OnPropertyChanged("Visibility");
             }
         }
-        private string fileName = "Bitte wähle eine Datei aus.";
-        public string FileName
+        private ObservableCollection<string> fileNames = new ObservableCollection<string>() { "Bitte wähle eine Datei aus." };
+        public ObservableCollection<string> FileNames
         {
             get
             {
-                if (this.fileName == null)
+                if (this.fileNames == null)
                 {
-                    this.fileName = string.Empty;
+                    this.fileNames = new ObservableCollection<string>();
                 }
-                return this.fileName;
+                return this.fileNames;
             }
             set
             {
-                this.fileName = value;
-                this.OnPropertyChanged("FileName");
+                this.fileNames = value;
+                this.OnPropertyChanged("FileNames");
             }
         }
         #endregion
@@ -92,7 +92,7 @@ namespace FileConverter.ViewModel
 
         private void CommandConvert(object obj)
         {
-            Model.Converter.Convert(filePath, Formats.Current);
+            Model.Converter.Convert(filePaths, Formats.Current);
         }
 
         private bool CanExecuteConvert(object arg)
@@ -108,24 +108,61 @@ namespace FileConverter.ViewModel
         public void CommandBrowse(object param)
         {
             OpenFileDialog openFileDialog = new OpenFileDialog();
+            openFileDialog.Multiselect = true;
             if (openFileDialog.ShowDialog() == true)
             {
+                // Array mit der richtigen Länge deklarieren
+                filePaths = new string[openFileDialog.FileNames.Length];
+                int j = 0;
+                foreach (string file in openFileDialog.FileNames)
+                {
+                    filePaths[j] = file;
+                    j++;
+
+                }
                 // file = File.ReadAllText(openFileDialog.FileName);
-                filePath = openFileDialog.FileName;
+            }
+            // Default Wert löschen
+            FileNames.Clear();
+            try // Falls Auswahl der Datei abgebrochen wird,... 
+            {
+
+                foreach (var file in filePaths)
+                {
+
+                    // Namen der Datei anzeigen
+                    FileNames.Add(Path.GetFileName(file));
+
+                    // TODO mehr Info an den Benutzer nach Prüfung, zb die triggernden Dateien oder so, oder "png und jpg", oder so
+
+                    // Prüfen, ob alle Dateien das selbe Format besitzen
+                    if (!Path.GetExtension(file).ToLower().Trim('.').Equals(Path.GetExtension(FileNames.First()).ToLower().Trim('.')))
+                    {
+                        FileNames.Clear();
+                        // TODO Wenn kein Inhalt FileNames automatisch den Default
+                        FileNames.Add("Bitte wähle eine Datei aus.");
+                        MessageBox.Show("Deine ausgewählten Dateien haben unterschiedliche Formate.", "Unterschiedliche Formate");
+                        Visibility = "Hidden";
+                        break;
+                    }
+                    // Zielformatwahl erscheinen lassen, soweit konvertierungsgeeignete Datei ausgewählt
+                    if (!Formats.Contains(Path.GetExtension(file).ToLower().Trim('.')))
+                    {
+                        FileNames.Clear();
+                        // TODO Wenn kein Inhalt FileNames automatisch den Default
+                        FileNames.Add("Bitte wähle eine Datei aus.");
+                        MessageBox.Show("Die Konvertierung eines der ausgewählten Dateienformate wird leider noch nicht unterstützt.", "Konvertierung nicht möglich");
+                        Visibility = "Hidden";
+                        break;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // ... ist das Programm automatisch auf der Startseite
             }
 
-            // Zielformatwahl erscheinen lassen, soweit konvertierungsgeeignete Datei ausgewählt wurde
-            if (!Formats.Contains(Path.GetExtension(filePath).ToLower().Trim('.')))
-            {
-                MessageBox.Show("Die Konvertierung des ausgewählten Dateienformats wird leider noch nicht unterstützt.", "Konvertierung nicht möglich");
-            }
-            else
-            {
-                Visibility = "Visible";
-            }
-
-            // Namen der Datei anzeigen
-            FileName = Path.GetFileName(filePath);
+            Visibility = "Visible";
         }
         public bool CanExecuteBrowse(object param)
         {
