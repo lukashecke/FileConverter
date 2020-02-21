@@ -47,13 +47,20 @@
                 VerticalAlignment="Top" 
                 Width="100" 
                 Grid.Column="1"/>
-        <ListView ItemsSource="{Binding FileNames}"
-                  IsHitTestVisible="False"
+
+        <ListView  ItemsSource="{Binding FileNames}"
+                   Focusable="False"
                   HorizontalAlignment="Left"
                   Height="203" 
                   Margin="10,10,0,0" 
                   VerticalAlignment="Top" 
-                  Width="177"/>
+                  Width="177">
+            <ListView.ItemContainerStyle>
+                <Style TargetType="ListViewItem">
+                    <Setter Property="IsHitTestVisible" Value="false"/>
+                </Style>
+            </ListView.ItemContainerStyle>
+        </ListView>
         <Label Content="© 2020 Lukas Hecke"
                FontSize="8"
                HorizontalAlignment="Left" 

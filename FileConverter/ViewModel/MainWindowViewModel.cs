@@ -44,6 +44,9 @@ namespace FileConverter.ViewModel
             }
         }
         private string visibility = "Hidden";
+        //DEBUG
+        private bool exceptionWasThrown = false;
+
         public string Visibility
         {
             get
@@ -159,10 +162,17 @@ namespace FileConverter.ViewModel
             }
             catch (Exception ex)
             {
-                // ... ist das Programm automatisch auf der Startseite
+                exceptionWasThrown = true;
+                Visibility = "Hidden";
+                FileNames.Clear();
+                // TODO Wenn kein Inhalt FileNames automatisch den Default
+                FileNames.Add("Bitte wähle eine Datei aus.");
+            }
+            if (!exceptionWasThrown)
+            {
+                Visibility = "Visible";
             }
 
-            Visibility = "Visible";
         }
         public bool CanExecuteBrowse(object param)
         {
