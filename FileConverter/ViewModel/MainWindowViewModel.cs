@@ -168,8 +168,7 @@ namespace FileConverter.ViewModel
             }
             return false;
         }
-
-        // TODO using wenn datei zum konvertieren benutzen sonst blockiert!!!!!
+        
         public void CommandBrowse(object param)
         {
             // TODO Ausgabe konvertierungstart und -ende
@@ -184,26 +183,21 @@ namespace FileConverter.ViewModel
                 {
                     filePaths[j] = file;
                     j++;
-
                 }
-                // file = File.ReadAllText(openFileDialog.FileName);
             }
             // Default Wert löschen
             FileNames.Clear();
             try // Falls Auswahl der Datei abgebrochen wird,... 
             {
-
                 foreach (var file in filePaths)
                 {
-
-                    // Namen der Datei anzeigen
                     FileNames.Add(Path.GetFileName(file));
-
-                    // TODO mehr Info an den Benutzer nach Prüfung, zb die triggernden Dateien oder so, oder "png und jpg", oder so
-
-                    // Prüfen, ob alle Dateien das selbe Format besitzen
-                    if (!Path.GetExtension(file).ToLower().Trim('.').Equals(Path.GetExtension(FileNames.First()).ToLower().Trim('.')))
+                    // TODO Erklärung?
+                    // Die erste Datei MUSS UMBEDINGT separat in eine Variable abgespeichert werden, damit diese wieder freigegeben wird. Wird im if durch FileNames.First() abgefragt, bleibt die erste datei zur Laufszeit des Programms gesperrt.
+                    string firstFile = FileNames.First();
+                    if (!Path.GetExtension(file).ToLower().Trim('.').Equals(Path.GetExtension(firstFile).ToLower().Trim('.'))) // Prüfen, ob alle Dateien das selbe Format besitzen
                     {
+                    // TODO mehr Info an den Benutzer nach Prüfung, zb die triggernden Dateien oder so, oder "png und jpg", oder so
                         FileNames.Clear();
                         // TODO Wenn kein Inhalt FileNames automatisch den Default
                         FileNames.Add("Bitte wähle eine Datei aus.");

@@ -36,7 +36,7 @@ namespace FileConverter.Model
             foreach (var file in filePaths)
             {
                 // TODO nach erster erfplgreicher Konvertierung , wird beim fehler der zweiten die zugriffssachen nicht unsichtbar?
-                // TODO using wenn datei zum konvertieren benutzen sonst blockiert!!!!!
+
                 string fileName = Path.GetFileNameWithoutExtension(file);
                 string fullName = Path.Combine(savingPath, fileName + "." + format.ToLower());
 
