@@ -24,10 +24,20 @@
                 Margin="50,226,0,0" 
                 Height="30" 
                 RenderTransformOrigin="0.458,0.422"/>
+        <!--Dieses Label muss den "Zielformatcontrols" gemalt werden-->
+        <Label Content="{Binding InfoText}"
+               Visibility="{Binding InfoTextVisibility}"
+               HorizontalContentAlignment="Center" 
+               Grid.Column="1" 
+               HorizontalAlignment="Left" 
+               Height="25" 
+               Margin="28,106,0,0" 
+               VerticalAlignment="Top" 
+               Width="152"/>
         <ComboBox ItemsSource="{Binding Formats}"
                   SelectedItem="{Binding Formats.Current, Mode=TwoWay}"
                   HorizontalAlignment="Left" 
-                  Visibility="{Binding Visibility}"
+                  Visibility="{Binding ZielformatVisibility}"
                   Margin="50,94,0,0" 
                   VerticalAlignment="Top" 
                   Width="100" 
@@ -35,12 +45,13 @@
                   Height="30" />
         <Label Content="Zielformat auswählen" 
                HorizontalContentAlignment="Center"
-               Visibility="{Binding Visibility}"
+               Visibility="{Binding ZielformatVisibility}"
                Margin="35,68,35,0" 
                VerticalAlignment="Top" 
                Grid.Column="1"/>
         <Button Content="Konvertieren" 
                 Command="{Binding ConvertCommand}"
+                Visibility="{Binding ButtonVisibility}"
                 HorizontalAlignment="Left" 
                 Height="30" 
                 Margin="50,183,0,0" 
@@ -69,5 +80,6 @@
                VerticalAlignment="Top" 
                Width="83" 
                Grid.Column="1"/>
+        
     </Grid>
 </Window>

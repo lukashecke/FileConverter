@@ -7,6 +7,7 @@ using System.Data;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
@@ -43,24 +44,78 @@ namespace FileConverter.ViewModel
                 this.OnPropertyChanged("Formats");
             }
         }
-        private string visibility = "Hidden";
         //DEBUG
         private bool exceptionWasThrown = false;
+        private string buttonVisibility = "Visible";
 
-        public string Visibility
+        public string ButtonVisibility
         {
             get
             {
-                if (this.visibility == null)
+                if (this.buttonVisibility == null)
                 {
-                    this.visibility = "Visible";
+                    this.buttonVisibility = "Visible";
                 }
-                return this.visibility;
+                return this.buttonVisibility;
             }
             set
             {
-                this.visibility = value;
-                this.OnPropertyChanged("Visibility");
+                this.buttonVisibility = value;
+                this.OnPropertyChanged("ButtonVisibility");
+            }
+        }
+        private string zielformatVisibility = "Hidden";
+
+        public string ZielformatVisibility
+        {
+            get
+            {
+                if (this.zielformatVisibility == null)
+                {
+                    this.zielformatVisibility = "Visible";
+                }
+                return this.zielformatVisibility;
+            }
+            set
+            {
+                this.zielformatVisibility = value;
+                this.OnPropertyChanged("ZielformatVisibility");
+            }
+        }
+        private string infoTextVisibility;
+
+        public string InfoTextVisibility
+        {
+            get
+            {
+                if (this.infoTextVisibility == null)
+                {
+                    this.infoTextVisibility = "Visible";
+                }
+                return this.infoTextVisibility;
+            }
+            set
+            {
+                this.zielformatVisibility = value;
+                this.OnPropertyChanged("InfoTextVisibility");
+            }
+        }
+        private string infoText;
+
+        public string InfoText
+        {
+            get
+            {
+                if (this.infoText == null)
+                {
+                    this.infoText = string.Empty;
+                }
+                return this.infoText;
+            }
+            set
+            {
+                this.infoText = value;
+                this.OnPropertyChanged("InfoText");
             }
         }
         private ObservableCollection<string> fileNames = new ObservableCollection<string>() { "Bitte wähle eine Datei aus." };
@@ -91,11 +146,18 @@ namespace FileConverter.ViewModel
             formats.Add("bmp");
             formats.Add("gif");
             formats.Add("tiff");
+            
         }
-
+        // TODO Statusleiste einbausen?
         private void CommandConvert(object obj)
         {
+            // TODO Grafik richtig dynamisieren
+            ButtonVisibility = "Hidden";
+            ZielformatVisibility = "Hidden";
+            InfoTextVisibility = "Visible";
+            InfoText = "Konvertierung läuft...";
             Model.Converter.Convert(filePaths, Formats.Current);
+            InfoText = "Konvertierung abgeschlossen!";
         }
 
         private bool CanExecuteConvert(object arg)
@@ -110,6 +172,7 @@ namespace FileConverter.ViewModel
         // TODO using wenn datei zum konvertieren benutzen sonst blockiert!!!!!
         public void CommandBrowse(object param)
         {
+            // TODO Ausgabe konvertierungstart und -ende
             OpenFileDialog openFileDialog = new OpenFileDialog();
             openFileDialog.Multiselect = true;
             if (openFileDialog.ShowDialog() == true)
@@ -145,7 +208,7 @@ namespace FileConverter.ViewModel
                         // TODO Wenn kein Inhalt FileNames automatisch den Default
                         FileNames.Add("Bitte wähle eine Datei aus.");
                         MessageBox.Show("Deine ausgewählten Dateien haben unterschiedliche Formate.", "Unterschiedliche Formate");
-                        Visibility = "Hidden";
+                        ZielformatVisibility = "Hidden";
                         break;
                     }
                     // Zielformatwahl erscheinen lassen, soweit konvertierungsgeeignete Datei ausgewählt
@@ -155,7 +218,7 @@ namespace FileConverter.ViewModel
                         // TODO Wenn kein Inhalt FileNames automatisch den Default
                         FileNames.Add("Bitte wähle eine Datei aus.");
                         MessageBox.Show("Die Konvertierung eines der ausgewählten Dateienformate wird leider noch nicht unterstützt.", "Konvertierung nicht möglich");
-                        Visibility = "Hidden";
+                        ZielformatVisibility = "Hidden";
                         break;
                     }
                 }
@@ -163,14 +226,14 @@ namespace FileConverter.ViewModel
             catch (Exception ex)
             {
                 exceptionWasThrown = true;
-                Visibility = "Hidden";
+                ZielformatVisibility = "Hidden";
                 FileNames.Clear();
                 // TODO Wenn kein Inhalt FileNames automatisch den Default
                 FileNames.Add("Bitte wähle eine Datei aus.");
             }
             if (!exceptionWasThrown)
             {
-                Visibility = "Visible";
+                ZielformatVisibility = "Visible";
             }
 
         }
