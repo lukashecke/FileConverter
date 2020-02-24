@@ -21,7 +21,6 @@ namespace FileConverter
 
             if (e.Data.GetDataPresent(DataFormats.FileDrop))
             {
-                //DropListBox.Items.Clear();
                 ((MainWindowViewModel)this.DataContext).FileNames.Clear();
 
 

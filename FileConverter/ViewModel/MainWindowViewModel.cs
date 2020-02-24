@@ -171,17 +171,18 @@ namespace FileConverter.ViewModel
         
         public void CommandBrowse(object param)
         {
+            string[] gettedFilePaths = new string[0];
             // TODO Ausgabe konvertierungstart und -ende
             OpenFileDialog openFileDialog = new OpenFileDialog();
             openFileDialog.Multiselect = true;
             if (openFileDialog.ShowDialog() == true)
             {
                 // Array mit der richtigen Länge deklarieren
-                filePaths = new string[openFileDialog.FileNames.Length];
+                gettedFilePaths = new string[openFileDialog.FileNames.Length];
                 int j = 0;
                 foreach (string file in openFileDialog.FileNames)
                 {
-                    filePaths[j] = file;
+                    gettedFilePaths[j] = file;
                     j++;
                 }
             }
@@ -189,7 +190,7 @@ namespace FileConverter.ViewModel
             FileNames.Clear();
             try // Falls Auswahl der Datei abgebrochen wurde,... 
             {
-                AddFiles(filePaths);
+                AddFiles(gettedFilePaths);
             }
             catch (Exception ex)
             {
@@ -202,7 +203,10 @@ namespace FileConverter.ViewModel
             
 
         }
-
+        /// <summary>
+        /// Gemeinsame Funktion für das hinzufügen von Dateien per Drag und Drop oder Browserauswahl
+        /// </summary>
+        /// <param name="filePaths"></param>
         public void AddFiles(string[] filePaths)
         {
             foreach (var file in filePaths)
@@ -233,8 +237,8 @@ namespace FileConverter.ViewModel
                 }
                 if (!exceptionWasThrown)
                 {
-                    this.filePaths = filePaths;
                     ZielformatVisibility = "Visible";
+                    this.filePaths = filePaths;
                 }
                
                 
