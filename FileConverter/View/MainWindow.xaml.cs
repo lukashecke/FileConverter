@@ -1,6 +1,7 @@
 ﻿using FileConverter.ViewModel;
+using System.IO;
 using System.Windows;
-
+using System.Windows.Controls;
 
 namespace FileConverter
 {
@@ -13,6 +14,23 @@ namespace FileConverter
         {
             this.DataContext = new MainWindowViewModel();
             InitializeComponent();
+        }
+
+        private void ListBox_Drop(object sender, DragEventArgs e)
+        {
+
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                //DropListBox.Items.Clear();
+                ((MainWindowViewModel)this.DataContext).FileNames.Clear();
+
+
+                string[] droppedFilePaths =
+                e.Data.GetData(DataFormats.FileDrop, true) as string[];
+
+                ((MainWindowViewModel)this.DataContext).AddFiles(droppedFilePaths);
+            }
+
         }
     }
 }

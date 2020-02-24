@@ -187,35 +187,9 @@ namespace FileConverter.ViewModel
             }
             // Default Wert löschen
             FileNames.Clear();
-            try // Falls Auswahl der Datei abgebrochen wird,... 
+            try // Falls Auswahl der Datei abgebrochen wurde,... 
             {
-                foreach (var file in filePaths)
-                {
-                    FileNames.Add(Path.GetFileName(file));
-                    // TODO Erklärung?
-                    // Die erste Datei MUSS UMBEDINGT separat in eine Variable abgespeichert werden, damit diese wieder freigegeben wird. Wird im if durch FileNames.First() abgefragt, bleibt die erste datei zur Laufszeit des Programms gesperrt.
-                    string firstFile = FileNames.First();
-                    if (!Path.GetExtension(file).ToLower().Trim('.').Equals(Path.GetExtension(firstFile).ToLower().Trim('.'))) // Prüfen, ob alle Dateien das selbe Format besitzen
-                    {
-                    // TODO mehr Info an den Benutzer nach Prüfung, zb die triggernden Dateien oder so, oder "png und jpg", oder so
-                        FileNames.Clear();
-                        // TODO Wenn kein Inhalt FileNames automatisch den Default
-                        FileNames.Add("Bitte wähle eine Datei aus.");
-                        MessageBox.Show("Deine ausgewählten Dateien haben unterschiedliche Formate.", "Unterschiedliche Formate");
-                        ZielformatVisibility = "Hidden";
-                        break;
-                    }
-                    // Zielformatwahl erscheinen lassen, soweit konvertierungsgeeignete Datei ausgewählt
-                    if (!Formats.Contains(Path.GetExtension(file).ToLower().Trim('.')))
-                    {
-                        FileNames.Clear();
-                        // TODO Wenn kein Inhalt FileNames automatisch den Default
-                        FileNames.Add("Bitte wähle eine Datei aus.");
-                        MessageBox.Show("Die Konvertierung eines der ausgewählten Dateienformate wird leider noch nicht unterstützt.", "Konvertierung nicht möglich");
-                        ZielformatVisibility = "Hidden";
-                        break;
-                    }
-                }
+                AddFiles(filePaths);
             }
             catch (Exception ex)
             {
@@ -225,12 +199,48 @@ namespace FileConverter.ViewModel
                 // TODO Wenn kein Inhalt FileNames automatisch den Default
                 FileNames.Add("Bitte wähle eine Datei aus.");
             }
-            if (!exceptionWasThrown)
-            {
-                ZielformatVisibility = "Visible";
-            }
+            
 
         }
+
+        public void AddFiles(string[] filePaths)
+        {
+            foreach (var file in filePaths)
+            {
+                FileNames.Add(Path.GetFileName(file));
+                // TODO Erklärung?
+                // Die erste Datei MUSS UMBEDINGT separat in eine Variable abgespeichert werden, damit diese wieder freigegeben wird. Wird im if durch FileNames.First() abgefragt, bleibt die erste datei zur Laufszeit des Programms gesperrt.
+                string firstFile = FileNames.First();
+                if (!Path.GetExtension(file).ToLower().Trim('.').Equals(Path.GetExtension(firstFile).ToLower().Trim('.'))) // Prüfen, ob alle Dateien das selbe Format besitzen
+                {
+                    // TODO mehr Info an den Benutzer nach Prüfung, zb die triggernden Dateien oder so, oder "png und jpg", oder so
+                    FileNames.Clear();
+                    // TODO Wenn kein Inhalt FileNames automatisch den Default
+                    FileNames.Add("Bitte wähle eine Datei aus.");
+                    MessageBox.Show("Deine ausgewählten Dateien haben unterschiedliche Formate.", "Unterschiedliche Formate");
+                    ZielformatVisibility = "Hidden";
+                    break;
+                }
+                // Zielformatwahl erscheinen lassen, soweit konvertierungsgeeignete Datei ausgewählt
+                if (!Formats.Contains(Path.GetExtension(file).ToLower().Trim('.')))
+                {
+                    FileNames.Clear();
+                    // TODO Wenn kein Inhalt FileNames automatisch den Default
+                    FileNames.Add("Bitte wähle eine Datei aus.");
+                    MessageBox.Show("Die Konvertierung eines der ausgewählten Dateienformate wird leider noch nicht unterstützt.", "Konvertierung nicht möglich");
+                    ZielformatVisibility = "Hidden";
+                    break;
+                }
+                if (!exceptionWasThrown)
+                {
+                    this.filePaths = filePaths;
+                    ZielformatVisibility = "Visible";
+                }
+               
+                
+            }
+        }
+
         public bool CanExecuteBrowse(object param)
         {
             return true;

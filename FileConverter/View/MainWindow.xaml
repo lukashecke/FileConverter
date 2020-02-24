@@ -59,7 +59,10 @@
                 Width="100" 
                 Grid.Column="1"/>
 
-        <ListView  ItemsSource="{Binding FileNames}"
+        <ListView  
+            ItemsSource="{Binding FileNames}"
+                   AllowDrop="True"
+                  Drop="ListBox_Drop"
                    Focusable="False"
                   HorizontalAlignment="Left"
                   Height="203" 
