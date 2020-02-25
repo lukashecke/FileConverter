@@ -21,9 +21,9 @@ namespace FileConverter.Model
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="filePaths"></param>
+        /// <param name="filePath"></param>
         /// <param name="format"></param>
-        public static void Convert(string[] filePaths, string format)
+        public static void Convert(string filePath, string format)
         {
             /* Microsoft Dokumentation
              * Windows Presentation Foundation (WPF) systemeigene Unterstützung für die Komprimierung und die decokomprimierung von Images von 
@@ -33,15 +33,14 @@ namespace FileConverter.Model
              * Portable Network Graphics (PNG) und 
              * Tagged Image File Format (TIFF).
              */
-            foreach (var file in filePaths)
-            {
-                string fileName = Path.GetFileNameWithoutExtension(file);
+            
+                string fileName = Path.GetFileNameWithoutExtension(filePath);
                 string fullName = Path.Combine(savingPath, fileName + "." + format.ToLower());
 
                 BitmapImage bi = new BitmapImage();
                 // BitmapImage.UriSource must be in a BeginInit/EndInit block.
                 bi.BeginInit();
-                bi.UriSource = new Uri(file, UriKind.RelativeOrAbsolute);
+                bi.UriSource = new Uri(filePath, UriKind.RelativeOrAbsolute);
                 bi.EndInit();
 
 
@@ -72,7 +71,7 @@ namespace FileConverter.Model
                     encoder.Frames.Add(BitmapFrame.Create(bi));
                     encoder.Save(fileStream);
                 }
-            }
+            
         }
     }
 }

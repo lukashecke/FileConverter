@@ -83,7 +83,6 @@ namespace FileConverter.ViewModel
             }
         }
         private string infoText;
-
         public string InfoText
         {
             get
@@ -98,6 +97,40 @@ namespace FileConverter.ViewModel
             {
                 this.infoText = value;
                 this.OnPropertyChanged("InfoText");
+            }
+        }
+        private string convertingFile;
+        public string ConvertingFile
+        {
+            get
+            {
+                if (this.convertingFile == null)
+                {
+                    this.convertingFile = string.Empty;
+                }
+                return this.convertingFile;
+            }
+            set
+            {
+                this.convertingFile = value;
+                this.OnPropertyChanged("ConvertingFile");
+            }
+        }
+        private int convertingProgress;
+        public int ConvertingProgress
+        {
+            get
+            {
+                if (this.convertingProgress == null)
+                {
+                    this.convertingProgress = 0;
+                }
+                return this.convertingProgress;
+            }
+            set
+            {
+                this.convertingProgress = value;
+                this.OnPropertyChanged("ConvertingProgress");
             }
         }
         private int comboBoxSelectedIndex = -1;
@@ -146,7 +179,6 @@ namespace FileConverter.ViewModel
             formats.Add("bmp");
             formats.Add("gif");
             formats.Add("tiff");
-            // TODO irgendwo wird noch zur Laufzeit eine Datei blockierrt!!!
         }
         private void CommandConvert(object obj)
         {
@@ -154,7 +186,16 @@ namespace FileConverter.ViewModel
             ButtonVisibility = "Hidden";
             ZielformatVisibility = "Hidden";
             InfoText = "Konvertierung läuft...";
-            Model.Converter.Convert(filePaths, Formats.Current);
+            int amountConvertedFiles = 0;
+            int amountOfFiles = filePaths.Length;
+            foreach (var file in filePaths)
+            {
+                ConvertingFile = file;
+                Model.Converter.Convert(file, Formats.Current);
+                amountConvertedFiles++;
+                //  ConvertingProgress muss Zahl zwischen 0 und 100 zurückgeben
+                ConvertingProgress = (int)((Convert.ToDouble(amountConvertedFiles) / amountOfFiles) *100);
+            }
             InfoText = "Konvertierung abgeschlossen!";
             // Um die Auswahl in der Kombobox für/ vor die nächste Auführung zu leeren
             ComboBoxSelectedIndex = -1;
@@ -187,7 +228,7 @@ namespace FileConverter.ViewModel
             }
             // FileNames auf Default setzen lassen
             FileNames = null;
-            try // Falls Auswahl der Datei abgebrochen wurde,... 
+            try
             {
                 if (gettedFilePaths.Count() > 0)
                 {
@@ -202,6 +243,12 @@ namespace FileConverter.ViewModel
                 exceptionWasThrown = true;
                 ZielformatVisibility = "Hidden";
             }
+            finally
+            {
+                // Statusleiste mit zurücksetzen
+                ConvertingFile = "";
+                ConvertingProgress = 0;
+            }
         }
         /// <summary>
         /// Gemeinsame Funktion für das hinzufügen von Dateien per Drag und Drop oder Browserauswahl
@@ -213,6 +260,9 @@ namespace FileConverter.ViewModel
             foreach (var file in filePaths)
             {
                 FileNames.Add(Path.GetFileName(file));
+                // Statusleiste mit zurücksetzen
+                ConvertingFile = "";
+                ConvertingProgress = 0;
             }
             foreach (var file in filePaths)
             {
@@ -249,6 +299,7 @@ namespace FileConverter.ViewModel
         {
             foreach (var file in filePaths)
             {
+                // TODO Zur Laufzeit werden irgendwo noch Dateien blockiert!
                 // TODO Erklärung?
                 // Die erste Datei MUSS UMBEDINGT separat in eine Variable abgespeichert werden, damit diese wieder freigegeben wird. Wird im if durch FileNames.First() abgefragt, bleibt die erste datei zur Laufszeit des Programms gesperrt.
                 string firstFile = FileNames.First();

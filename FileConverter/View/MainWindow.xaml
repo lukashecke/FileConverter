@@ -5,10 +5,11 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:FileConverter"
         mc:Ignorable="d"
-        Title="File Converter" Height="300" Width="400"
+        Title="File Converter" Height="320" Width="400"
         Background="LightGray"
         ResizeMode="NoResize"
         WindowStartupLocation="CenterScreen">
+    <StackPanel>
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width ="*"/>
@@ -85,4 +86,34 @@
                Grid.Column="1"/>
         
     </Grid>
+        <DockPanel>
+            <StatusBar DockPanel.Dock="Bottom">
+                <StatusBar.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="100" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="100" />
+                            </Grid.ColumnDefinitions>
+                        </Grid>
+                    </ItemsPanelTemplate>
+                </StatusBar.ItemsPanel>
+                <!--<StatusBarItem>
+                    <TextBlock Name="lblCursorPosition" />
+                </StatusBarItem>-->
+                <!--<Separator Grid.Column="1" />-->
+                <StatusBarItem Grid.Column="0" Grid.ColumnSpan="2">
+                    <!--<TextBlock Text="c:\path\of\current\file.txt" />-->
+                    <TextBlock Text="{Binding ConvertingFile}"/>
+                </StatusBarItem>
+                <Separator Grid.Column="2" />
+                <StatusBarItem Grid.Column="3">
+                    <ProgressBar Value="{Binding ConvertingProgress}" Width="90" Height="16" />
+                </StatusBarItem>
+            </StatusBar>
+            <!--<TextBox AcceptsReturn="True" Name="txtEditor" SelectionChanged="txtEditor_SelectionChanged" />-->
+        </DockPanel>
+    </StackPanel>
 </Window>
