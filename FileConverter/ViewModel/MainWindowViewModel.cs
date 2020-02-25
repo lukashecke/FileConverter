@@ -82,24 +82,6 @@ namespace FileConverter.ViewModel
                 this.OnPropertyChanged("ZielformatVisibility");
             }
         }
-        private string infoTextVisibility;
-
-        public string InfoTextVisibility
-        {
-            get
-            {
-                if (this.infoTextVisibility == null)
-                {
-                    this.infoTextVisibility = "Visible";
-                }
-                return this.infoTextVisibility;
-            }
-            set
-            {
-                this.zielformatVisibility = value;
-                this.OnPropertyChanged("InfoTextVisibility");
-            }
-        }
         private string infoText;
 
         public string InfoText
@@ -116,6 +98,24 @@ namespace FileConverter.ViewModel
             {
                 this.infoText = value;
                 this.OnPropertyChanged("InfoText");
+            }
+        }
+        private int comboBoxSelectedIndex = -1;
+
+        public int ComboBoxSelectedIndex
+        {
+            get
+            {
+                if (this.comboBoxSelectedIndex == null)
+                {
+                    this.comboBoxSelectedIndex = -1;
+                }
+                return this.comboBoxSelectedIndex;
+            }
+            set
+            {
+                this.comboBoxSelectedIndex = value;
+                this.OnPropertyChanged("ComboBoxSelectedIndex");
             }
         }
         private ObservableCollection<string> fileNames = new ObservableCollection<string>() { "Bitte wähle eine Datei aus." };
@@ -146,7 +146,7 @@ namespace FileConverter.ViewModel
             formats.Add("bmp");
             formats.Add("gif");
             formats.Add("tiff");
-            
+            // TODO irgendwo wird noch zur Laufzeit eine Datei blockierrt!!!
         }
         // TODO Statusleiste einbausen?
         private void CommandConvert(object obj)
@@ -154,10 +154,11 @@ namespace FileConverter.ViewModel
             // TODO Grafik richtig dynamisieren
             ButtonVisibility = "Hidden";
             ZielformatVisibility = "Hidden";
-            InfoTextVisibility = "Visible";
             InfoText = "Konvertierung läuft...";
             Model.Converter.Convert(filePaths, Formats.Current);
             InfoText = "Konvertierung abgeschlossen!";
+            // Um die Auswahl in der Kombobox für/ vor die nächste Auführung zu leeren
+            ComboBoxSelectedIndex = -1;
         }
 
         private bool CanExecuteConvert(object arg)
@@ -237,7 +238,10 @@ namespace FileConverter.ViewModel
                 }
                 if (!exceptionWasThrown)
                 {
+                    // Da nach erster Ausführung auf "Visible"
+                    InfoText = "";
                     ZielformatVisibility = "Visible";
+                    ButtonVisibility = "Visible";
                     this.filePaths = filePaths;
                 }
                

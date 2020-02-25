@@ -26,7 +26,6 @@
                 RenderTransformOrigin="0.458,0.422"/>
         <!--Dieses Label muss den "Zielformatcontrols" gemalt werden-->
         <Label Content="{Binding InfoText}"
-               Visibility="{Binding InfoTextVisibility}"
                HorizontalContentAlignment="Center" 
                Grid.Column="1" 
                HorizontalAlignment="Left" 
@@ -36,6 +35,7 @@
                Width="152"/>
         <ComboBox ItemsSource="{Binding Formats}"
                   SelectedItem="{Binding Formats.Current, Mode=TwoWay}"
+                  SelectedIndex="{Binding ComboBoxSelectedIndex}"
                   HorizontalAlignment="Left" 
                   Visibility="{Binding ZielformatVisibility}"
                   Margin="50,94,0,0" 
