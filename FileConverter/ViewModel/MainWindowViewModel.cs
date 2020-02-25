@@ -150,7 +150,7 @@ namespace FileConverter.ViewModel
         }
         private void CommandConvert(object obj)
         {
-            // TODO Infotext richtig dynamisieren, bzw. Statusleiste einbauen?
+            // TODO Infotext richtig dynamisieren (Kovertierungstart und -ende dynamisch für Benutzer ausgeben), bzw. Statusleiste einbauen?
             ButtonVisibility = "Hidden";
             ZielformatVisibility = "Hidden";
             InfoText = "Konvertierung läuft...";
@@ -168,11 +168,10 @@ namespace FileConverter.ViewModel
             }
             return false;
         }
-        
+
         public void CommandBrowse(object param)
         {
             string[] gettedFilePaths = new string[0];
-            // TODO Ausgabe konvertierungstart und -ende
             OpenFileDialog openFileDialog = new OpenFileDialog();
             openFileDialog.Multiselect = true;
             if (openFileDialog.ShowDialog() == true)
@@ -190,7 +189,7 @@ namespace FileConverter.ViewModel
             FileNames = null;
             try // Falls Auswahl der Datei abgebrochen wurde,... 
             {
-                if (gettedFilePaths.Count()>0)
+                if (gettedFilePaths.Count() > 0)
                 {
                     // Wenn Dateien ausgewählt wurden soll der Defaultwert gelöscht werden
                     FileNames.Clear();
@@ -199,11 +198,10 @@ namespace FileConverter.ViewModel
             }
             catch (Exception ex)
             {
+                MessageBox.Show(ex.Message, "Programmfehler");
                 exceptionWasThrown = true;
-                ZielformatVisibility = "Hidden"; 
+                ZielformatVisibility = "Hidden";
             }
-
-
         }
         /// <summary>
         /// Gemeinsame Funktion für das hinzufügen von Dateien per Drag und Drop oder Browserauswahl
@@ -214,22 +212,19 @@ namespace FileConverter.ViewModel
             foreach (var file in filePaths)
             {
                 FileNames.Add(Path.GetFileName(file));
-                // TODO Erklärung?
-                // Die erste Datei MUSS UMBEDINGT separat in eine Variable abgespeichert werden, damit diese wieder freigegeben wird. Wird im if durch FileNames.First() abgefragt, bleibt die erste datei zur Laufszeit des Programms gesperrt.
-                string firstFile = FileNames.First();
-                if (!Path.GetExtension(file).ToLower().Trim('.').Equals(Path.GetExtension(firstFile).ToLower().Trim('.'))) // Prüfen, ob alle Dateien das selbe Format besitzen
+                bool allSameFormat = false;
+                allSameFormat = CheckIfSameFormats(filePaths);
+                if (!allSameFormat)
                 {
-                    // TODO mehr Info an den Benutzer nach Prüfung, zb die triggernden Dateien oder so, oder "png und jpg", oder so
-                    FileNames.Clear();
-                    MessageBox.Show("Deine ausgewählten Dateien haben unterschiedliche Formate.", "Unterschiedliche Formate");
-                    ZielformatVisibility = "Hidden";
                     break;
                 }
-                // Zielformatwahl erscheinen lassen, soweit konvertierungsgeeignete Datei ausgewählt
+                
+                // Zielformatwahl erscheinen lassen, soweit konvertierungsgeeignete Dateien ausgewählt
                 if (!Formats.Contains(Path.GetExtension(file).ToLower().Trim('.')))
                 {
-                    FileNames.Clear();
-                    MessageBox.Show("Die Konvertierung eines der ausgewählten Dateienformate wird leider noch nicht unterstützt.", "Konvertierung nicht möglich");
+                    // FileNames auf Default setzen lassen
+                    FileNames = null;
+                    MessageBox.Show("Die Konvertierung des ausgewählten Dateiformats wird leider noch nicht unterstützt.", "Konvertierung nicht möglich");
                     ZielformatVisibility = "Hidden";
                     break;
                 }
@@ -241,9 +236,30 @@ namespace FileConverter.ViewModel
                     ButtonVisibility = "Visible";
                     this.filePaths = filePaths;
                 }
-               
-                
             }
+        }
+        /// <summary>
+        /// Checks, message and returns if the formats of all the files are the same
+        /// </summary>
+        /// <param name="filePaths"></param>
+        /// <returns></returns>
+        private bool CheckIfSameFormats(string[] filePaths)
+        {
+            foreach (var file in filePaths)
+            {
+                // TODO Erklärung?
+                // Die erste Datei MUSS UMBEDINGT separat in eine Variable abgespeichert werden, damit diese wieder freigegeben wird. Wird im if durch FileNames.First() abgefragt, bleibt die erste datei zur Laufszeit des Programms gesperrt.
+                string firstFile = FileNames.First();
+                if (!Path.GetExtension(file).ToLower().Trim('.').Equals(Path.GetExtension(firstFile).ToLower().Trim('.'))) // Prüfen, ob alle Dateien das selbe Format besitzen
+                {
+                    // FileNames auf Default setzen lassen
+                    FileNames = null;
+                    MessageBox.Show("Nicht alle deiner Dateien besitzen das selbe Format.", "Unterschiedliche Formate");
+                    ZielformatVisibility = "Hidden";
+                    return false;
+                }
+            }
+            return true;
         }
 
         public bool CanExecuteBrowse(object param)
