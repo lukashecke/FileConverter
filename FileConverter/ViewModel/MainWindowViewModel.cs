@@ -209,9 +209,13 @@ namespace FileConverter.ViewModel
         /// <param name="filePaths"></param>
         public void AddFiles(string[] filePaths)
         {
+            // Die ListView soll gefüllt werden, auch wenn die Konvertierung nicht stattfinden kann, damit der Benutzer seine Eingabe überprüfen kann
             foreach (var file in filePaths)
             {
                 FileNames.Add(Path.GetFileName(file));
+            }
+            foreach (var file in filePaths)
+            {
                 bool allSameFormat = false;
                 allSameFormat = CheckIfSameFormats(filePaths);
                 if (!allSameFormat)
@@ -222,8 +226,6 @@ namespace FileConverter.ViewModel
                 // Zielformatwahl erscheinen lassen, soweit konvertierungsgeeignete Dateien ausgewählt
                 if (!Formats.Contains(Path.GetExtension(file).ToLower().Trim('.')))
                 {
-                    // FileNames auf Default setzen lassen
-                    FileNames = null;
                     MessageBox.Show("Die Konvertierung des ausgewählten Dateiformats wird leider noch nicht unterstützt.", "Konvertierung nicht möglich");
                     ZielformatVisibility = "Hidden";
                     break;
@@ -252,8 +254,6 @@ namespace FileConverter.ViewModel
                 string firstFile = FileNames.First();
                 if (!Path.GetExtension(file).ToLower().Trim('.').Equals(Path.GetExtension(firstFile).ToLower().Trim('.'))) // Prüfen, ob alle Dateien das selbe Format besitzen
                 {
-                    // FileNames auf Default setzen lassen
-                    FileNames = null;
                     MessageBox.Show("Nicht alle deiner Dateien besitzen das selbe Format.", "Unterschiedliche Formate");
                     ZielformatVisibility = "Hidden";
                     return false;
