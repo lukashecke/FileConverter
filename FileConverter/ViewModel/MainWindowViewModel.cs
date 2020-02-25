@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
+using System.Windows.Threading;
 
 namespace FileConverter.ViewModel
 {
@@ -194,11 +195,24 @@ namespace FileConverter.ViewModel
                 Model.Converter.Convert(file, Formats.Current);
                 amountConvertedFiles++;
                 //  ConvertingProgress muss Zahl zwischen 0 und 100 zurückgeben
-                ConvertingProgress = (int)((Convert.ToDouble(amountConvertedFiles) / amountOfFiles) *100);
+                ConvertingProgress = (int)((Convert.ToDouble(amountConvertedFiles) / amountOfFiles) * 100);
+                // Manuelles UI-Refresh
+                EnforceUIUpdate();
             }
             InfoText = "Konvertierung abgeschlossen!";
             // Um die Auswahl in der Kombobox für/ vor die nächste Auführung zu leeren
             ComboBoxSelectedIndex = -1;
+        }
+
+        void EnforceUIUpdate()
+        {
+            DispatcherFrame frame = new DispatcherFrame();
+            Application.Current.Dispatcher.Invoke(DispatcherPriority.Render, new DispatcherOperationCallback(delegate (object parameter)
+            {
+                frame.Continue = false;
+                return null;
+            }), null);
+            Dispatcher.PushFrame(frame);
         }
 
         private bool CanExecuteConvert(object arg)
@@ -272,7 +286,7 @@ namespace FileConverter.ViewModel
                 {
                     break;
                 }
-                
+
                 // Zielformatwahl erscheinen lassen, soweit konvertierungsgeeignete Dateien ausgewählt
                 if (!Formats.Contains(Path.GetExtension(file).ToLower().Trim('.')))
                 {
