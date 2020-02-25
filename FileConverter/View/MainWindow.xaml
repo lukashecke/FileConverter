@@ -15,7 +15,7 @@
                 <ColumnDefinition Width ="*"/>
                 <ColumnDefinition Width ="*"/>
             </Grid.ColumnDefinitions>
-            <Button Content="Datei(en) suchen" 
+            <Button Content="Dateien suchen" 
                     HorizontalContentAlignment="Center"
                     Background="White" 
                     Command="{Binding BrowseCommand}"

@@ -150,14 +150,14 @@ namespace FileConverter.ViewModel
                 this.OnPropertyChanged("ComboBoxSelectedIndex");
             }
         }
-        private ObservableCollection<string> fileNames = new ObservableCollection<string>() { "Bitte wähle eine Datei aus." };
+        private ObservableCollection<string> fileNames = new ObservableCollection<string>() { "Bitte wähle deine Dateien aus." };
         public ObservableCollection<string> FileNames
         {
             get
             {
                 if (this.fileNames == null)
                 {
-                    this.fileNames = new ObservableCollection<string>() { "Bitte wähle eine Datei aus." };
+                    this.fileNames = new ObservableCollection<string>() { "Bitte wähle deine Dateien aus." };
                 }
                 return this.fileNames;
             }

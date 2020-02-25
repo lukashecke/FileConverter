@@ -1,4 +1,5 @@
 ﻿using FileConverter.ViewModel;
+using System.Collections.Generic;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
@@ -26,9 +27,21 @@ namespace FileConverter
                 string[] droppedFilePaths =
                 e.Data.GetData(DataFormats.FileDrop, true) as string[];
 
-                ((MainWindowViewModel)this.DataContext).AddFiles(droppedFilePaths);
+                List<string> temp = new List<string>();
+                foreach (var path in droppedFilePaths)
+                {
+                    if (Directory.Exists(path))
+                    {
+                        // Übergebene Ordner werden ausgelesen
+                        temp.AddRange(Directory.GetFiles(path));
+                    }
+                    else
+                    {
+                        temp.Add(path);
+                    }
+                }
+                ((MainWindowViewModel)this.DataContext).AddFiles(temp.ToArray());
             }
-
         }
     }
 }
