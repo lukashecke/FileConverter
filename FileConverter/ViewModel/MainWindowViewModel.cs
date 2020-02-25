@@ -15,10 +15,12 @@ using System.Windows.Threading;
 
 namespace FileConverter.ViewModel
 {
-
     public class MainWindowViewModel : ViewModelBase
     {
+        private static string savingPath = $@"C:\Users\{Environment.UserName.ToString().ToLower()}\Desktop\File Converter";
         private string[] filePaths;
+        //DEBUG
+        private bool exceptionWasThrown = false;
         public ICommand BrowseCommand
         {
             get; set;
@@ -27,6 +29,7 @@ namespace FileConverter.ViewModel
         {
             get; set;
         }
+
         #region Entitäten
         private ObservableCollectionEx<string> formats = new ObservableCollectionEx<string>();
         public ObservableCollectionEx<string> Formats
@@ -45,10 +48,7 @@ namespace FileConverter.ViewModel
                 this.OnPropertyChanged("Formats");
             }
         }
-        //DEBUG
-        private bool exceptionWasThrown = false;
         private string buttonVisibility = "Visible";
-
         public string ButtonVisibility
         {
             get
@@ -66,7 +66,6 @@ namespace FileConverter.ViewModel
             }
         }
         private string zielformatVisibility = "Hidden";
-
         public string ZielformatVisibility
         {
             get
@@ -135,7 +134,6 @@ namespace FileConverter.ViewModel
             }
         }
         private int comboBoxSelectedIndex = -1;
-
         public int ComboBoxSelectedIndex
         {
             get
@@ -181,8 +179,10 @@ namespace FileConverter.ViewModel
             formats.Add("gif");
             formats.Add("tiff");
         }
+
         private void CommandConvert(object obj)
         {
+            CreateSavingDirectory();
             // TODO Infotext richtig dynamisieren (Kovertierungstart und -ende dynamisch für Benutzer ausgeben), bzw. Statusleiste einbauen?
             ButtonVisibility = "Hidden";
             ZielformatVisibility = "Hidden";
@@ -192,7 +192,7 @@ namespace FileConverter.ViewModel
             foreach (var file in filePaths)
             {
                 ConvertingFile = file;
-                Model.Converter.Convert(file, Formats.Current);
+                Model.Converter.Convert(file, Formats.Current, savingPath);
                 amountConvertedFiles++;
                 //  ConvertingProgress muss Zahl zwischen 0 und 100 zurückgeben
                 ConvertingProgress = (int)((Convert.ToDouble(amountConvertedFiles) / amountOfFiles) * 100);
@@ -202,6 +202,11 @@ namespace FileConverter.ViewModel
             InfoText = "Konvertierung abgeschlossen!";
             // Um die Auswahl in der Kombobox für/ vor die nächste Auführung zu leeren
             ComboBoxSelectedIndex = -1;
+        }
+
+        private void CreateSavingDirectory()
+        {
+            Directory.CreateDirectory(savingPath);
         }
 
         void EnforceUIUpdate()

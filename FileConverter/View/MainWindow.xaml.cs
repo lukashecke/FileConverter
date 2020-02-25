@@ -23,7 +23,6 @@ namespace FileConverter
             {
                 ((MainWindowViewModel)this.DataContext).FileNames.Clear();
 
-
                 string[] droppedFilePaths =
                 e.Data.GetData(DataFormats.FileDrop, true) as string[];
 
