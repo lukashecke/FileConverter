@@ -125,7 +125,7 @@ namespace FileConverter.ViewModel
             {
                 if (this.fileNames == null)
                 {
-                    this.fileNames = new ObservableCollection<string>();
+                    this.fileNames = new ObservableCollection<string>() { "Bitte wähle eine Datei aus." };
                 }
                 return this.fileNames;
             }
@@ -148,10 +148,9 @@ namespace FileConverter.ViewModel
             formats.Add("tiff");
             // TODO irgendwo wird noch zur Laufzeit eine Datei blockierrt!!!
         }
-        // TODO Statusleiste einbausen?
         private void CommandConvert(object obj)
         {
-            // TODO Grafik richtig dynamisieren
+            // TODO Infotext richtig dynamisieren, bzw. Statusleiste einbauen?
             ButtonVisibility = "Hidden";
             ZielformatVisibility = "Hidden";
             InfoText = "Konvertierung läuft...";
@@ -187,21 +186,23 @@ namespace FileConverter.ViewModel
                     j++;
                 }
             }
-            // Default Wert löschen
-            FileNames.Clear();
+            // FileNames auf Default setzen lassen
+            FileNames = null;
             try // Falls Auswahl der Datei abgebrochen wurde,... 
             {
+                if (gettedFilePaths.Count()>0)
+                {
+                    // Wenn Dateien ausgewählt wurden soll der Defaultwert gelöscht werden
+                    FileNames.Clear();
+                }
                 AddFiles(gettedFilePaths);
             }
             catch (Exception ex)
             {
                 exceptionWasThrown = true;
-                ZielformatVisibility = "Hidden";
-                FileNames.Clear();
-                // TODO Wenn kein Inhalt FileNames automatisch den Default
-                FileNames.Add("Bitte wähle eine Datei aus.");
+                ZielformatVisibility = "Hidden"; 
             }
-            
+
 
         }
         /// <summary>
@@ -220,8 +221,6 @@ namespace FileConverter.ViewModel
                 {
                     // TODO mehr Info an den Benutzer nach Prüfung, zb die triggernden Dateien oder so, oder "png und jpg", oder so
                     FileNames.Clear();
-                    // TODO Wenn kein Inhalt FileNames automatisch den Default
-                    FileNames.Add("Bitte wähle eine Datei aus.");
                     MessageBox.Show("Deine ausgewählten Dateien haben unterschiedliche Formate.", "Unterschiedliche Formate");
                     ZielformatVisibility = "Hidden";
                     break;
@@ -230,8 +229,6 @@ namespace FileConverter.ViewModel
                 if (!Formats.Contains(Path.GetExtension(file).ToLower().Trim('.')))
                 {
                     FileNames.Clear();
-                    // TODO Wenn kein Inhalt FileNames automatisch den Default
-                    FileNames.Add("Bitte wähle eine Datei aus.");
                     MessageBox.Show("Die Konvertierung eines der ausgewählten Dateienformate wird leider noch nicht unterstützt.", "Konvertierung nicht möglich");
                     ZielformatVisibility = "Hidden";
                     break;
