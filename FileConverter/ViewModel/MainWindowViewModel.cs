@@ -48,14 +48,14 @@ namespace FileConverter.ViewModel
                 this.OnPropertyChanged("Formats");
             }
         }
-        private string buttonVisibility = "Visible";
+        private string buttonVisibility = "Hidden";
         public string ButtonVisibility
         {
             get
             {
                 if (this.buttonVisibility == null)
                 {
-                    this.buttonVisibility = "Visible";
+                    this.buttonVisibility = "Hidden";
                 }
                 return this.buttonVisibility;
             }
@@ -82,14 +82,14 @@ namespace FileConverter.ViewModel
                 this.OnPropertyChanged("ZielformatVisibility");
             }
         }
-        private string infoText;
+        private string infoText = "Bitte wähle deine Dateien aus.";
         public string InfoText
         {
             get
             {
                 if (this.infoText == null)
                 {
-                    this.infoText = string.Empty;
+                    this.infoText = "Bitte wähle deine Dateien aus.";
                 }
                 return this.infoText;
             }
@@ -150,14 +150,14 @@ namespace FileConverter.ViewModel
                 this.OnPropertyChanged("ComboBoxSelectedIndex");
             }
         }
-        private ObservableCollection<string> fileNames = new ObservableCollection<string>() { "Bitte wähle deine Dateien aus." };
+        private ObservableCollection<string> fileNames = new ObservableCollection<string>() { "Hier reinziehen möglich" };
         public ObservableCollection<string> FileNames
         {
             get
             {
                 if (this.fileNames == null)
                 {
-                    this.fileNames = new ObservableCollection<string>() { "Bitte wähle deine Dateien aus." };
+                    this.fileNames = new ObservableCollection<string>() { "Hier reinziehen möglich." };
                 }
                 return this.fileNames;
             }
