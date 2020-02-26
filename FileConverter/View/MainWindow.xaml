@@ -5,91 +5,109 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:FileConverter"
         mc:Ignorable="d"
-        Title="File Converter" Height="320" Width="400"
+        Title="File Converter" Height="350" Width="450"
         Background="LightGray"
-        ResizeMode="NoResize"
         WindowStartupLocation="CenterScreen">
-    <StackPanel>
-        <Grid>
+    <!--Change back to: ResizeMode="NoResize"-->
+    <Grid Name="Window">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="11*"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid Name="Content"
+              Grid.Row="0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width ="*"/>
                 <ColumnDefinition Width ="*"/>
             </Grid.ColumnDefinitions>
-            <Button Content="Dateien suchen" 
-                    HorizontalContentAlignment="Center"
-                    Background="White" 
-                    Command="{Binding BrowseCommand}"
-                    HorizontalAlignment="Left" 
-                    VerticalAlignment="Top" 
-                    Width="100" 
-                    Margin="50,226,0,0" 
-                    Height="30" 
-                    RenderTransformOrigin="0.458,0.422"/>
-            <!--Dieses Label muss den "Zielformatcontrols" gemalt werden-->
-            <Label Content="{Binding InfoText}"
-                   HorizontalContentAlignment="Center" 
-                   Grid.Column="1" 
-                   HorizontalAlignment="Left" 
-                   Height="25" 
-                   Margin="28,106,0,0" 
-                   VerticalAlignment="Top" 
-                   Width="152"/>
-            <ComboBox ItemsSource="{Binding Formats}"
-                      SelectedItem="{Binding Formats.Current, Mode=TwoWay}"
-                      SelectedIndex="{Binding ComboBoxSelectedIndex}"
-                      HorizontalAlignment="Left" 
-                      Visibility="{Binding ZielformatVisibility}"
-                      Margin="50,94,0,0" 
-                      VerticalAlignment="Top" 
-                      Width="100" 
-                      Grid.Column="1" 
-                      Height="30" />
-            <Label Content="Zielformat auswählen" 
-                   HorizontalContentAlignment="Center"
-                   Visibility="{Binding ZielformatVisibility}"
-                   Margin="35,68,35,0" 
-                   VerticalAlignment="Top" 
-                   Grid.Column="1"/>
-            <Button Content="Konvertieren" 
-                    Command="{Binding ConvertCommand}"
-                    Visibility="{Binding ButtonVisibility}"
-                    HorizontalAlignment="Left" 
-                    Height="30" 
-                    Margin="50,183,0,0" 
-                    VerticalAlignment="Top" 
-                    Width="100" 
-                    Grid.Column="1"/>
-            <ListView ItemsSource="{Binding FileNames}"
-                      AllowDrop="True"
-                      Drop="ListBox_Drop"
-                      Focusable="False"
-                      HorizontalAlignment="Left"
-                      Height="203" 
-                      Margin="10,10,0,0" 
-                      VerticalAlignment="Top" 
-                      Width="177">
-                <ListView.ItemContainerStyle>
-                    <Style TargetType="ListViewItem">
-                        <Setter Property="IsHitTestVisible" Value="false"/>
-                    </Style>
-                </ListView.ItemContainerStyle>
-            </ListView>
-            <Label Content="© 2020 Lukas Hecke"
-               FontSize="8"
-               HorizontalAlignment="Left" 
-               Height="19" 
-               Margin="104,242,0,0" 
-               VerticalAlignment="Top" 
-               Width="83" 
-               Grid.Column="1"/>
+            <Grid Name="Left">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="5*"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <Grid>
+                    <ListView ItemsSource="{Binding FileNames}"
+                              Drop="ListBox_Drop"
+                              AllowDrop="True"
+                              Focusable="False"
+                              Grid.Row="0"
+                              HorizontalAlignment="Stretch"
+                              VerticalAlignment="Stretch"
+                              Margin="10,10,10,0">
+                        <ListView.ItemContainerStyle>
+                            <Style TargetType="ListViewItem">
+                                <Setter Property="IsHitTestVisible" Value="false"/>
+                            </Style>
+                        </ListView.ItemContainerStyle>
+                    </ListView>
+                </Grid>
+                <Button Content="Dateien suchen" 
+                        Command="{Binding BrowseCommand}"
+                        Background="White" 
+                        HorizontalContentAlignment="Center"
+                        Grid.Row="1"
+                        Height="30"
+                        Width="100"  
+                        HorizontalAlignment="Center" 
+                        VerticalAlignment="Center"/>
+            </Grid>
+            <Grid Name="Right" 
+                  Grid.Column="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <!--Dieses Label muss den "Zielformatcontrols" gemalt werden-->
+                <Label Content="{Binding InfoText}"
+                       Grid.Row="2"
+                       HorizontalContentAlignment="Center"
+                       HorizontalAlignment="Center" 
+                       VerticalAlignment="Center">
+                </Label>
+                <Label Content="Zielformat auswählen" 
+                       Visibility="{Binding ZielformatVisibility}" 
+                       Grid.Row="1"
+                       HorizontalContentAlignment="Center"
+                       VerticalAlignment="Bottom">
+                </Label>
+                <ComboBox ItemsSource="{Binding Formats}"
+                          SelectedItem="{Binding Formats.Current, Mode=TwoWay}"
+                          SelectedIndex="{Binding ComboBoxSelectedIndex}"
+                          Visibility="{Binding ZielformatVisibility}"
+                          Grid.Row="2"
+                          Height="30"
+                          Width="100"  
+                          HorizontalAlignment="Center" 
+                          VerticalAlignment="Top">
+                </ComboBox>
+                <Button Content="Konvertieren" 
+                        Command="{Binding ConvertCommand}"
+                        Visibility="{Binding ButtonVisibility}"
+                        Grid.Row="3"
+                        Height="30"
+                        Width="100" 
+                        HorizontalAlignment="Center" 
+                        VerticalAlignment="Bottom">
+                </Button>
+                <Label Content="© 2020 Lukas Hecke"
+                       FontSize="8"
+                       Grid.Row="5"
+                       HorizontalAlignment="Right" 
+                       VerticalAlignment="Bottom">
+                </Label>
+            </Grid>
         </Grid>
-        <DockPanel>
+        <DockPanel Name="Infobar"
+                   Grid.Row="1">
             <StatusBar DockPanel.Dock="Bottom">
                 <StatusBar.ItemsPanel>
                     <ItemsPanelTemplate>
                         <Grid>
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="100" />
                                 <ColumnDefinition Width="*" />
                                 <ColumnDefinition Width="Auto" />
                                 <ColumnDefinition Width="100" />
@@ -97,20 +115,14 @@
                         </Grid>
                     </ItemsPanelTemplate>
                 </StatusBar.ItemsPanel>
-                <!--<StatusBarItem>
-                    <TextBlock Name="lblCursorPosition" />
-                </StatusBarItem>-->
-                <!--<Separator Grid.Column="1" />-->
                 <StatusBarItem Grid.Column="0" Grid.ColumnSpan="2">
-                    <!--<TextBlock Text="c:\path\of\current\file.txt" />-->
                     <TextBlock Text="{Binding ConvertingFile}"/>
                 </StatusBarItem>
-                <Separator Grid.Column="2" />
+                <Separator Grid.Column="1" />
                 <StatusBarItem Grid.Column="3">
                     <ProgressBar Value="{Binding ConvertingProgress}" Width="90" Height="16" />
                 </StatusBarItem>
             </StatusBar>
-            <!--<TextBox AcceptsReturn="True" Name="txtEditor" SelectionChanged="txtEditor_SelectionChanged" />-->
         </DockPanel>
-    </StackPanel>
+    </Grid>
 </Window>
