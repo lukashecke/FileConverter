@@ -151,7 +151,7 @@ namespace FileConverter.ViewModel
                 this.OnPropertyChanged("ComboBoxSelectedIndex");
             }
         }
-        private ObservableCollection<string> fileNames = new ObservableCollection<string>() { "Hier reinziehen möglich" };
+        private ObservableCollection<string> fileNames = new ObservableCollection<string>() { "Hier reinziehen möglich." };
         public ObservableCollection<string> FileNames
         {
             get
@@ -258,9 +258,15 @@ namespace FileConverter.ViewModel
             }
             finally
             {
-                // Statusleiste mit zurücksetzen
-                ConvertingFile = "";
-                ConvertingProgress = 0;
+                if (FileNames.First().Equals("Hier reinziehen möglich.")) // default
+                {
+                    // TODO Statusleiste und co. automatisiert zurücksetzen
+                    ConvertingFile = "";
+                    ConvertingProgress = 0;
+                    InfoText = "Bitte wähle deine Dateien aus.";
+                    ZielformatVisibility = "Hidden";
+                    ButtonVisibility = "Hidden";
+                }
             }
         }
         /// <summary>
