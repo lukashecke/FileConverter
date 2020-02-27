@@ -3,6 +3,7 @@ using FileConverter.Model;
 using Microsoft.Win32;
 using System;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Data;
 using System.IO;
 using System.Linq;
@@ -172,7 +173,7 @@ namespace FileConverter.ViewModel
         public MainWindowViewModel()
         {
             this.BrowseCommand = new RelayCommand(CommandBrowse, CanExecuteBrowse);
-            this.ConvertCommand = new RelayCommand(CommandConvert, CanExecuteConvert);
+            this.ConvertCommand = new RelayCommand(ExecuteConvertCommandAsync, CanExecuteConvert);
             formats.Add("png");
             formats.Add("jpg");
             formats.Add("bmp");
@@ -180,10 +181,16 @@ namespace FileConverter.ViewModel
             formats.Add("tiff");
         }
 
-        private void CommandConvert(object obj)
+        // TODO Fragen: Soll das Command überhaupt async enden und was funktioniert hier genau wie
+        private void ExecuteConvertCommandAsync(object obj)
+        {
+            BackgroundWorker worker = new BackgroundWorker();
+            worker.DoWork += worker_DoWork;
+            worker.RunWorkerAsync();
+        }
+        private void worker_DoWork(object sender, DoWorkEventArgs e)
         {
             CreateSavingDirectory();
-            // TODO Infotext richtig dynamisieren (Kovertierungstart und -ende dynamisch für Benutzer ausgeben), bzw. Statusleiste einbauen?
             ButtonVisibility = "Hidden";
             ZielformatVisibility = "Hidden";
             InfoText = "Konvertierung läuft...";
@@ -196,8 +203,6 @@ namespace FileConverter.ViewModel
                 amountConvertedFiles++;
                 //  ConvertingProgress muss Zahl zwischen 0 und 100 zurückgeben
                 ConvertingProgress = (int)((Convert.ToDouble(amountConvertedFiles) / amountOfFiles) * 100);
-                // Manuelles UI-Refresh
-                EnforceUIUpdate();
             }
             InfoText = "Konvertierung abgeschlossen!";
             // Um die Auswahl in der Kombobox für/ vor die nächste Auführung zu leeren
@@ -207,17 +212,6 @@ namespace FileConverter.ViewModel
         private void CreateSavingDirectory()
         {
             Directory.CreateDirectory(savingPath);
-        }
-
-        void EnforceUIUpdate()
-        {
-            DispatcherFrame frame = new DispatcherFrame();
-            Application.Current.Dispatcher.Invoke(DispatcherPriority.Render, new DispatcherOperationCallback(delegate (object parameter)
-            {
-                frame.Continue = false;
-                return null;
-            }), null);
-            Dispatcher.PushFrame(frame);
         }
 
         private bool CanExecuteConvert(object arg)
@@ -331,7 +325,6 @@ namespace FileConverter.ViewModel
             }
             return true;
         }
-
         public bool CanExecuteBrowse(object param)
         {
             return true;

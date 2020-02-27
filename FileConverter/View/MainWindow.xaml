@@ -5,10 +5,12 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:FileConverter"
         mc:Ignorable="d"
-        Title="File Converter" Height="350" Width="450"
+        Title="File Converter" 
+        Height="350" 
+        Width="450"
         Background="LightGray"
+        ResizeMode="NoResize"
         WindowStartupLocation="CenterScreen">
-    <!--Change back to: ResizeMode="NoResize"-->
     <Grid Name="Window">
         <Grid.RowDefinitions>
             <RowDefinition Height="11*"/>
