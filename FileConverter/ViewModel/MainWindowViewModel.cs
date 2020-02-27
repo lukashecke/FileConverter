@@ -20,8 +20,6 @@ namespace FileConverter.ViewModel
     {
         private static string savingPath = $@"C:\Users\{Environment.UserName.ToString().ToLower()}\Desktop\File Converter";
         private string[] filePaths;
-        //DEBUG
-        private bool exceptionWasThrown = false;
         public ICommand BrowseCommand
         {
             get; set;
@@ -239,34 +237,11 @@ namespace FileConverter.ViewModel
                     j++;
                 }
             }
-            // FileNames auf Default setzen lassen
-            FileNames = null;
-            try
+            if (gettedFilePaths.Count() > 0)
             {
-                if (gettedFilePaths.Count() > 0)
-                {
-                    // Wenn Dateien ausgewählt wurden soll der Defaultwert gelöscht werden
-                    FileNames.Clear();
-                }
+                // Wenn Dateien ausgewählt wurden soll der Defaultwert gelöscht werden
+                FileNames.Clear();
                 AddFiles(gettedFilePaths);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message, "Programmfehler");
-                exceptionWasThrown = true;
-                ZielformatVisibility = "Hidden";
-            }
-            finally
-            {
-                if (FileNames.First().Equals("Hier reinziehen möglich.")) // default
-                {
-                    // TODO Statusleiste und co. automatisiert zurücksetzen
-                    ConvertingFile = "";
-                    ConvertingProgress = 0;
-                    InfoText = "Bitte wähle deine Dateien aus.";
-                    ZielformatVisibility = "Hidden";
-                    ButtonVisibility = "Hidden";
-                }
             }
         }
         /// <summary>
@@ -299,14 +274,11 @@ namespace FileConverter.ViewModel
                     ZielformatVisibility = "Hidden";
                     break;
                 }
-                if (!exceptionWasThrown)
-                {
-                    // Da nach erster Ausführung auf "Visible"
-                    InfoText = "";
-                    ZielformatVisibility = "Visible";
-                    ButtonVisibility = "Visible";
-                    this.filePaths = filePaths;
-                }
+                // Da nach erster Ausführung auf "Visible"
+                InfoText = "";
+                ZielformatVisibility = "Visible";
+                ButtonVisibility = "Visible";
+                this.filePaths = filePaths;
             }
         }
         /// <summary>
