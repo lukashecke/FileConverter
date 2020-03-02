@@ -32,6 +32,10 @@ namespace FileConverter.ViewModel
         {
             get; set;
         }
+        public ICommand CancelCommand
+        {
+            get; set;
+        }
 
         #region Entitäten
         private ObservableCollectionEx<string> formats = new ObservableCollectionEx<string>();
@@ -66,6 +70,23 @@ namespace FileConverter.ViewModel
             {
                 this.buttonVisibility = value;
                 this.OnPropertyChanged("ButtonVisibility");
+            }
+        }
+        private string cancelVisibility = "Hidden";
+        public string CancelVisibility
+        {
+            get
+            {
+                if (this.cancelVisibility == null)
+                {
+                    this.cancelVisibility = "Hidden";
+                }
+                return this.cancelVisibility;
+            }
+            set
+            {
+                this.cancelVisibility = value;
+                this.OnPropertyChanged("CancelVisibility");
             }
         }
         private string zielformatVisibility = "Hidden";
@@ -167,16 +188,25 @@ namespace FileConverter.ViewModel
         public MainWindowViewModel()
         {
             this.BrowseCommand = new RelayCommand(ExecuteBrowseCommand, CanExecuteBrowse);
-            this.ConvertCommand = new RelayCommand(ExecuteConvertCommandAsync, CanExecuteConvert);
+            this.ConvertCommand = new RelayCommand(ExecuteConvertCommand, CanExecuteConvert);
+            this.CancelCommand = new RelayCommand(ExecuteCancelCommand, CanExecuteCancel);
             formats.Add("png");
             formats.Add("jpg");
             formats.Add("bmp");
             formats.Add("gif");
             formats.Add("tiff");
         }
+        private void ExecuteCancelCommand(object obj)
+        {
+            MessageBox.Show("Die Konvertierung wurde abgebrochen.", "Abbruch");
+        }
 
-        // TODO Fragen: Soll das Command überhaupt async enden und was funktioniert hier genau wie
-        private void ExecuteConvertCommandAsync(object obj)
+        private bool CanExecuteCancel(object arg)
+        {
+            return true;
+        }
+        
+        private void ExecuteConvertCommand(object obj)
         {
             CreateSavingDirectory();
             amountConvertedFiles = 0;
@@ -184,18 +214,17 @@ namespace FileConverter.ViewModel
             ButtonVisibility = "Hidden";
             ZielformatVisibility = "Hidden";
             InfoText = "Konvertierung läuft...";
+            CancelVisibility = "Visible";
 
             BackgroundWorker worker = new BackgroundWorker();
+            worker.WorkerSupportsCancellation = true;
             // TODO Wo melde ich dieses Ereignis manuell ab? Garbage Collection macht das automatisch?
             worker.DoWork += worker_DoWorkParallel;
-            //worker.DoWork += worker_DoWork;
             worker.RunWorkerAsync();
         }
 
         private void worker_DoWorkParallel(object sender, DoWorkEventArgs e)
         {
-            //Stopwatch sw = new Stopwatch();
-            //sw.Start();
             string[] filePathsArray = filePaths.ToArray();
             Task[] tasks = new Task[amountOfFiles];
             for (int i = 0; i < amountOfFiles; i++)
@@ -205,29 +234,12 @@ namespace FileConverter.ViewModel
                 //tasks[i].Wait(50);
             }
             Task.WaitAll(tasks);
-            //sw.Stop();
+            CancelVisibility = "Hidden";
             InfoText = "Konvertierung abgeschlossen!";
             // Um die Auswahl in der Kombobox für/ vor die nächste Auführung zu leeren
             ComboBoxSelectedIndex = -1;
         }
 
-        private void worker_DoWork(object sender, DoWorkEventArgs e)
-        {
-            //Stopwatch sw = new Stopwatch();
-            //sw.Start();
-            foreach (var file in filePaths)
-            {
-                ConvertingFile = file;
-                Converter.ConvertAsync(file, Formats.Current, savingPath);
-                // Die Dauer der Konvertierung hat hier extremen Einfluss auf die Laufzeit
-                // Thread.Sleep(50);
-                amountConvertedFiles++;
-                //  ConvertingProgress muss Zahl zwischen 0 und 100 zurückgeben
-                ConvertingProgress = (int)((Convert.ToDouble(amountConvertedFiles) / amountOfFiles) * 100);
-            }
-            //sw.Stop();
-            InfoText = "Konvertierung abgeschlossen!";
-        }
         private async Task ConvertFile(string file)
         {
             ConvertingFile = file;
