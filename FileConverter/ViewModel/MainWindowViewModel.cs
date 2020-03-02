@@ -5,9 +5,11 @@ using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
@@ -122,10 +124,6 @@ namespace FileConverter.ViewModel
         {
             get
             {
-                if (this.convertingProgress == null)
-                {
-                    this.convertingProgress = 0;
-                }
                 return this.convertingProgress;
             }
             set
@@ -139,10 +137,6 @@ namespace FileConverter.ViewModel
         {
             get
             {
-                if (this.comboBoxSelectedIndex == null)
-                {
-                    this.comboBoxSelectedIndex = -1;
-                }
                 return this.comboBoxSelectedIndex;
             }
             set
@@ -172,7 +166,6 @@ namespace FileConverter.ViewModel
 
         public MainWindowViewModel()
         {
-            // TODO Multithreading beim Konvertieren
             this.BrowseCommand = new RelayCommand(ExecuteBrowseCommand, CanExecuteBrowse);
             this.ConvertCommand = new RelayCommand(ExecuteConvertCommandAsync, CanExecuteConvert);
             formats.Add("png");
@@ -188,50 +181,61 @@ namespace FileConverter.ViewModel
             CreateSavingDirectory();
             amountConvertedFiles = 0;
             amountOfFiles = filePaths.Length;
-            BackgroundWorker worker = new BackgroundWorker();
-            // TODO Wo melde ich dieses Ereignis ab?
-            worker.DoWork += worker_DoWork;
-            worker.RunWorkerAsync();
-        }
-        private void worker_DoWork(object sender, DoWorkEventArgs e)
-        {
             ButtonVisibility = "Hidden";
             ZielformatVisibility = "Hidden";
             InfoText = "Konvertierung läuft...";
-            foreach (var file in filePaths)
+
+            BackgroundWorker worker = new BackgroundWorker();
+            // TODO Wo melde ich dieses Ereignis manuell ab? Garbage Collection macht das automatisch?
+            worker.DoWork += worker_DoWorkParallel;
+            //worker.DoWork += worker_DoWork;
+            worker.RunWorkerAsync();
+        }
+
+        private void worker_DoWorkParallel(object sender, DoWorkEventArgs e)
+        {
+            //Stopwatch sw = new Stopwatch();
+            //sw.Start();
+            string[] filePathsArray = filePaths.ToArray();
+            Task[] tasks = new Task[amountOfFiles];
+            for (int i = 0; i < amountOfFiles; i++)
             {
-                ConvertingFile = file;
-                Converter.Convert(file, Formats.Current, savingPath);
-                amountConvertedFiles++;
-                //  ConvertingProgress muss Zahl zwischen 0 und 100 zurückgeben
-                ConvertingProgress = (int)((Convert.ToDouble(amountConvertedFiles) / amountOfFiles) * 100);
+                // Die Dauer der Konvertierung hat hier kaum Einfluss auf die Laufzeit
+                tasks[i] = ConvertFile(filePathsArray[i]);
+                //tasks[i].Wait(50);
             }
+            Task.WaitAll(tasks);
+            //sw.Stop();
             InfoText = "Konvertierung abgeschlossen!";
             // Um die Auswahl in der Kombobox für/ vor die nächste Auführung zu leeren
             ComboBoxSelectedIndex = -1;
         }
-        // TODO Ergibt hier parallelisierung überhaupt einen Sinn? Wo ergeben Tasks, await-async, ... einen Sinn?
-        //private void worker_DoWorkAsync(object sender, DoWorkEventArgs e)
-        //{
-        //    CreateSavingDirectory();
-        //    ButtonVisibility = "Hidden";
-        //    ZielformatVisibility = "Hidden";
-        //    InfoText = "Konvertierung läuft...";
-        //    int amountConvertedFiles = 0;
-        //    int amountOfFiles = filePaths.Length;
-        //    Task[] tasks = new Task[amountOfFiles];
-        //    Parallel.ForEach(filePaths, file =>
-        //    {
-        //        ConvertingFile = file;
-        //        Model.Converter.Convert(file, Formats.Current, savingPath);
-        //        amountConvertedFiles++;
-        //        //  ConvertingProgress muss Zahl zwischen 0 und 100 zurückgeben
-        //        ConvertingProgress = (int)((Convert.ToDouble(amountConvertedFiles) / amountOfFiles) * 100);
-        //    });
-        //    InfoText = "Konvertierung abgeschlossen!";
-        //    // Um die Auswahl in der Kombobox für/ vor die nächste Auführung zu leeren
-        //    ComboBoxSelectedIndex = -1;
-        //}
+
+        private void worker_DoWork(object sender, DoWorkEventArgs e)
+        {
+            //Stopwatch sw = new Stopwatch();
+            //sw.Start();
+            foreach (var file in filePaths)
+            {
+                ConvertingFile = file;
+                Converter.ConvertAsync(file, Formats.Current, savingPath);
+                // Die Dauer der Konvertierung hat hier extremen Einfluss auf die Laufzeit
+                // Thread.Sleep(50);
+                amountConvertedFiles++;
+                //  ConvertingProgress muss Zahl zwischen 0 und 100 zurückgeben
+                ConvertingProgress = (int)((Convert.ToDouble(amountConvertedFiles) / amountOfFiles) * 100);
+            }
+            //sw.Stop();
+            InfoText = "Konvertierung abgeschlossen!";
+        }
+        private async Task ConvertFile(string file)
+        {
+            ConvertingFile = file;
+            await Converter.ConvertAsync(file, Formats.Current, savingPath);
+            amountConvertedFiles++;
+            //  ConvertingProgress muss Zahl zwischen 0 und 100 zurückgeben
+            ConvertingProgress = (int)((Convert.ToDouble(amountConvertedFiles) / amountOfFiles) * 100);
+        }
 
         private void CreateSavingDirectory()
         {

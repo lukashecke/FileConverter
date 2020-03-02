@@ -20,7 +20,7 @@ namespace FileConverter.Model
         /// </summary>
         /// <param name="filePath"></param>
         /// <param name="format"></param>
-        public static void Convert(string filePath, string format, string savingPath)
+        public static Task ConvertAsync(string filePath, string format, string savingPath)
         {
             /* Microsoft Dokumentation
              * Windows Presentation Foundation (WPF) systemeigene Unterstützung für die Komprimierung und die decokomprimierung von Images von 
@@ -65,6 +65,7 @@ namespace FileConverter.Model
                 encoder.Frames.Add(BitmapFrame.Create(bi));
                 encoder.Save(fileStream);
             }
+            return Task.CompletedTask;
         }
     }
 }
