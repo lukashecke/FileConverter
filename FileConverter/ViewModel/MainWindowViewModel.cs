@@ -20,6 +20,8 @@ namespace FileConverter.ViewModel
     {
         private static string savingPath = $@"C:\Users\{Environment.UserName.ToString().ToLower()}\Desktop\File Converter";
         private string[] filePaths;
+        private int amountConvertedFiles;
+        private int amountOfFiles;
         public ICommand BrowseCommand
         {
             get; set;
@@ -170,7 +172,8 @@ namespace FileConverter.ViewModel
 
         public MainWindowViewModel()
         {
-            this.BrowseCommand = new RelayCommand(CommandBrowse, CanExecuteBrowse);
+            // TODO Multithreading beim Konvertieren
+            this.BrowseCommand = new RelayCommand(ExecuteBrowseCommand, CanExecuteBrowse);
             this.ConvertCommand = new RelayCommand(ExecuteConvertCommandAsync, CanExecuteConvert);
             formats.Add("png");
             formats.Add("jpg");
@@ -182,22 +185,23 @@ namespace FileConverter.ViewModel
         // TODO Fragen: Soll das Command überhaupt async enden und was funktioniert hier genau wie
         private void ExecuteConvertCommandAsync(object obj)
         {
+            CreateSavingDirectory();
+            amountConvertedFiles = 0;
+            amountOfFiles = filePaths.Length;
             BackgroundWorker worker = new BackgroundWorker();
+            // TODO Wo melde ich dieses Ereignis ab?
             worker.DoWork += worker_DoWork;
             worker.RunWorkerAsync();
         }
         private void worker_DoWork(object sender, DoWorkEventArgs e)
         {
-            CreateSavingDirectory();
             ButtonVisibility = "Hidden";
             ZielformatVisibility = "Hidden";
             InfoText = "Konvertierung läuft...";
-            int amountConvertedFiles = 0;
-            int amountOfFiles = filePaths.Length;
             foreach (var file in filePaths)
             {
                 ConvertingFile = file;
-                Model.Converter.Convert(file, Formats.Current, savingPath);
+                Converter.Convert(file, Formats.Current, savingPath);
                 amountConvertedFiles++;
                 //  ConvertingProgress muss Zahl zwischen 0 und 100 zurückgeben
                 ConvertingProgress = (int)((Convert.ToDouble(amountConvertedFiles) / amountOfFiles) * 100);
@@ -206,6 +210,28 @@ namespace FileConverter.ViewModel
             // Um die Auswahl in der Kombobox für/ vor die nächste Auführung zu leeren
             ComboBoxSelectedIndex = -1;
         }
+        // TODO Ergibt hier parallelisierung überhaupt einen Sinn? Wo ergeben Tasks, await-async, ... einen Sinn?
+        //private void worker_DoWorkAsync(object sender, DoWorkEventArgs e)
+        //{
+        //    CreateSavingDirectory();
+        //    ButtonVisibility = "Hidden";
+        //    ZielformatVisibility = "Hidden";
+        //    InfoText = "Konvertierung läuft...";
+        //    int amountConvertedFiles = 0;
+        //    int amountOfFiles = filePaths.Length;
+        //    Task[] tasks = new Task[amountOfFiles];
+        //    Parallel.ForEach(filePaths, file =>
+        //    {
+        //        ConvertingFile = file;
+        //        Model.Converter.Convert(file, Formats.Current, savingPath);
+        //        amountConvertedFiles++;
+        //        //  ConvertingProgress muss Zahl zwischen 0 und 100 zurückgeben
+        //        ConvertingProgress = (int)((Convert.ToDouble(amountConvertedFiles) / amountOfFiles) * 100);
+        //    });
+        //    InfoText = "Konvertierung abgeschlossen!";
+        //    // Um die Auswahl in der Kombobox für/ vor die nächste Auführung zu leeren
+        //    ComboBoxSelectedIndex = -1;
+        //}
 
         private void CreateSavingDirectory()
         {
@@ -221,7 +247,7 @@ namespace FileConverter.ViewModel
             return false;
         }
 
-        public void CommandBrowse(object param)
+        public void ExecuteBrowseCommand(object param)
         {
             string[] gettedFilePaths = new string[0];
             OpenFileDialog openFileDialog = new OpenFileDialog();
