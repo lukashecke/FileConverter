@@ -25,7 +25,7 @@ namespace FileConverter.ViewModel
         private List<string> filePaths;
         private int amountConvertedFiles;
         private int amountOfFiles;
-        private List<BackgroundWorker> backgroundWorkers= new List<BackgroundWorker>();
+        private List<BackgroundWorker> backgroundWorkers = new List<BackgroundWorker>();
         public ICommand BrowseCommand
         {
             get; set;
@@ -200,17 +200,24 @@ namespace FileConverter.ViewModel
         }
         private void ExecuteCancelCommand(object obj)
         {
-            // TODO worker.CancelAsync
-            MessageBox.Show("Die Konvertierung wurde abgebrochen.", "Abbruch");
+            // TODO funktioniert noch nicht so ganz, oder doch? => Multithreading...
+            foreach (var worker in backgroundWorkers)
+            {
+                worker.CancelAsync();
+            }
+            InfoText = "Die Konvertierung wurde abgebrochen";
+            CancelVisibility = "Hidden";
+            ComboBoxSelectedIndex = -1; // Um die Auswahl in der Kombobox für/ vor die nächste Auführung zu leeren
         }
 
         private bool CanExecuteCancel(object arg)
         {
             return true;
         }
-        
+
         private void ExecuteConvertCommand(object obj)
         {
+            backgroundWorkers.Clear(); // Nach einem Abbruch bleiben diese sonst auf altem Wert, was in der Schleife zu fehlern führen kann
             CreateSavingDirectory();
             amountConvertedFiles = 0;
             amountOfFiles = filePaths.Count;
@@ -219,13 +226,7 @@ namespace FileConverter.ViewModel
             InfoText = "Konvertierung läuft...";
             CancelVisibility = "Visible";
 
-            Task t = new Task(()=>
-            {
-                this.OnPropertyChanged("Formats"); // TODO Das Formats.Current aktualisiert irgendwie nicht
-            });
-            Task.WhenAll(t);
-            
-            
+
             string[] filePathsArray = filePaths.ToArray();
 
             // Früher einen BackgroundWorker gestartet, der DoWorkSerial ausführt
@@ -234,30 +235,30 @@ namespace FileConverter.ViewModel
             {
                 backgroundWorkers.Add(new BackgroundWorker());// BackgroundWorker quasi grafische Threads // liste aus backgroundworkern für jede konvertierung 1
             }
-        
+
             int i = 0;
             foreach (var worker in backgroundWorkers) // Nicht parallel starten, weil jeder ein Element erhalten muss und eine parallele Iteration eins auslassen könnte
             {
-                worker.WorkerSupportsCancellation = true; // TODO Exception: worker war null
+                worker.WorkerSupportsCancellation = true;
                 worker.DoWork += worker_DoWorkParallel;
                 worker.RunWorkerAsync(filePathsArray[i]); // löst do_work Event aus
                 i++;
             }
-
-            // Wait for all backgroundworker, then...
-            
         }
         private void worker_DoWorkParallel(object sender, DoWorkEventArgs e)
         {
             BackgroundWorker worker = sender as BackgroundWorker; // Get the BackgroundWorker that raised this event.
+            if (worker.CancellationPending == true)
+            {
+                e.Cancel = true;
+                return;
+            }
             string filePath = e.Argument as string; // TODO was genau ist diese as? Cast von LINQ?
             ConvertFileParallel(filePath);
             // worker.ProgressChanged += worker_ProgressChanged; mach ich noch in der Convert Methode
             worker.RunWorkerCompleted += worker_RunWorkerCompleted;
             this.filePaths.Remove(filePath);
-
         }
-
         private void worker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
             BackgroundWorker worker = sender as BackgroundWorker;
@@ -265,40 +266,13 @@ namespace FileConverter.ViewModel
             worker.DoWork -= worker_DoWorkParallel;
             worker.RunWorkerCompleted -= worker_RunWorkerCompleted;
 
-            if (backgroundWorkers.Count() == 0)
+            if (backgroundWorkers.Count() == 0) // Wait for all backgroundworker, then...
             {
-            CancelVisibility = "Hidden";
-            InfoText = "Konvertierung abgeschlossen!";
-            ComboBoxSelectedIndex = -1; // Um die Auswahl in der Kombobox für/ vor die nächste Auführung zu leeren
-
+                CancelVisibility = "Hidden";
+                InfoText = "Konvertierung abgeschlossen!";
+                ComboBoxSelectedIndex = -1; // Um die Auswahl in der Kombobox für/ vor die nächste Auführung zu leeren
             }
-
         }
-
-        //[Obsolete]
-        //private void worker_DoWorkSerial(object sender, DoWorkEventArgs e)
-        //{
-        //    string[] filePathsArray = filePaths.ToArray();
-        //    Task[] tasks = new Task[amountOfFiles];
-        //    for (int i = 0; i < amountOfFiles; i++)
-        //    {
-        //        tasks[i] = ConvertFileSerial(filePathsArray[i]);
-        //    }
-        //    Task.WaitAll(tasks);
-        //    CancelVisibility = "Hidden";
-        //    InfoText = "Konvertierung abgeschlossen!";
-        //    // Um die Auswahl in der Kombobox für/ vor die nächste Auführung zu leeren
-        //    ComboBoxSelectedIndex = -1;
-        //}
-        //[Obsolete]
-        //private async Task ConvertFileSerial(string file)
-        //{
-        //    ConvertingFile = file;
-        //    await Converter.ConvertAsync(file, Formats.Current, savingPath);
-        //    amountConvertedFiles++;
-        //    //  ConvertingProgress muss Zahl zwischen 0 und 100 zurückgeben
-        //    ConvertingProgress = (int)((Convert.ToDouble(amountConvertedFiles) / amountOfFiles) * 100);
-        //}
         private void ConvertFileParallel(string file)
         {
             ConvertingFile = file;
@@ -325,14 +299,22 @@ namespace FileConverter.ViewModel
 
         public void ExecuteBrowseCommand(object param)
         {
+            //Task t = new Task(() =>
+            //{
+            //    InfoText = "Dateien werden geladen...";
+            //});
+            //t.Start();
+            //Task.WaitAll(t);
             string[] gettedFilePaths = new string[0];
             OpenFileDialog openFileDialog = new OpenFileDialog();
             openFileDialog.Multiselect = true;
             if (openFileDialog.ShowDialog() == true)
             {
+                
                 // Array mit der richtigen Länge deklarieren
                 gettedFilePaths = new string[openFileDialog.FileNames.Length];
                 int j = 0;
+
                 foreach (string file in openFileDialog.FileNames)
                 {
                     gettedFilePaths[j] = file;
@@ -343,8 +325,16 @@ namespace FileConverter.ViewModel
             {
                 // Wenn Dateien ausgewählt wurden soll der Defaultwert gelöscht werden
                 FileNames.Clear();
+                // TODO Text wird noch nicht aktualisiert
+                InfoText = "Dateien werden geladen...";
                 AddFiles(gettedFilePaths);
             }
+            //// TODO "Dateien werden geladen..."
+            //BackgroundWorker worker = new BackgroundWorker();
+            //worker.DoWork += worker_executeBrowse;
+            //worker.RunWorkerAsync();
+            //InfoText = "Dateien werden geladen...";
+
         }
         /// <summary>
         /// Gemeinsame Funktion für das hinzufügen von Dateien per Drag und Drop oder Browserauswahl

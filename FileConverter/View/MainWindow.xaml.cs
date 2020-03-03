@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Windows;
-using System.Windows.Controls;
 
 namespace FileConverter
 {
@@ -19,7 +18,8 @@ namespace FileConverter
 
         private void ListBox_Drop(object sender, DragEventArgs e)
         {
-
+            // TODO InfoText ändert noch nicht
+            ((MainWindowViewModel)this.DataContext).InfoText = "Dateien werden geladen...";
             if (e.Data.GetDataPresent(DataFormats.FileDrop))
             {
                 ((MainWindowViewModel)this.DataContext).FileNames.Clear();
@@ -40,7 +40,7 @@ namespace FileConverter
                         temp.Add(path);
                     }
                 }
-                ((MainWindowViewModel)this.DataContext).AddFiles(temp.ToArray());
+               ((MainWindowViewModel)this.DataContext).AddFiles(temp.ToArray());
             }
         }
     }
