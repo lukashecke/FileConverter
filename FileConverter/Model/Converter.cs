@@ -11,16 +11,16 @@ namespace FileConverter.Model
     /// <summary>
     /// Konvertiert und speichert die Datei.
     /// </summary>
-    static class Converter
+    public class Converter
     {
-        private static BitmapEncoder encoder;
+        private BitmapEncoder encoder;
         
         /// <summary>
         /// 
         /// </summary>
         /// <param name="filePath"></param>
         /// <param name="format"></param>
-        public static Task ConvertAsync(string filePath, string format, string savingPath)
+        public void  Convert(string filePath, string format, string savingPath)
         {
             /* Microsoft Dokumentation
              * Windows Presentation Foundation (WPF) systemeigene Unterstützung für die Komprimierung und die decokomprimierung von Images von 
@@ -65,7 +65,6 @@ namespace FileConverter.Model
                 encoder.Frames.Add(BitmapFrame.Create(bi));
                 encoder.Save(fileStream);
             }
-            return Task.CompletedTask;
         }
     }
 }

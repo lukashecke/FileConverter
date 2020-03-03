@@ -2,6 +2,7 @@
 using FileConverter.Model;
 using Microsoft.Win32;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Data;
@@ -21,9 +22,10 @@ namespace FileConverter.ViewModel
     public class MainWindowViewModel : ViewModelBase
     {
         private static string savingPath = $@"C:\Users\{Environment.UserName.ToString().ToLower()}\Desktop\File Converter";
-        private string[] filePaths;
+        private List<string> filePaths;
         private int amountConvertedFiles;
         private int amountOfFiles;
+        private List<BackgroundWorker> backgroundWorkers= new List<BackgroundWorker>();
         public ICommand BrowseCommand
         {
             get; set;
@@ -198,6 +200,7 @@ namespace FileConverter.ViewModel
         }
         private void ExecuteCancelCommand(object obj)
         {
+            // TODO worker.CancelAsync
             MessageBox.Show("Die Konvertierung wurde abgebrochen.", "Abbruch");
         }
 
@@ -210,40 +213,97 @@ namespace FileConverter.ViewModel
         {
             CreateSavingDirectory();
             amountConvertedFiles = 0;
-            amountOfFiles = filePaths.Length;
+            amountOfFiles = filePaths.Count;
             ButtonVisibility = "Hidden";
             ZielformatVisibility = "Hidden";
             InfoText = "Konvertierung läuft...";
             CancelVisibility = "Visible";
 
-            BackgroundWorker worker = new BackgroundWorker();
-            worker.WorkerSupportsCancellation = true;
-            // TODO Wo melde ich dieses Ereignis manuell ab? Garbage Collection macht das automatisch?
-            worker.DoWork += worker_DoWorkParallel;
-            worker.RunWorkerAsync();
-        }
+            Task t = new Task(()=>
+            {
+                this.OnPropertyChanged("Formats"); // TODO Das Formats.Current aktualisiert irgendwie nicht
+            });
+            Task.WhenAll(t);
+            
+            
+            string[] filePathsArray = filePaths.ToArray();
 
+            // Früher einen BackgroundWorker gestartet, der DoWorkSerial ausführt
+            // Muss passieren sonst bleiben die Backgroundworker null
+            for (int j = 0; j < amountOfFiles; j++)
+            {
+                backgroundWorkers.Add(new BackgroundWorker());// BackgroundWorker quasi grafische Threads // liste aus backgroundworkern für jede konvertierung 1
+            }
+        
+            int i = 0;
+            foreach (var worker in backgroundWorkers) // Nicht parallel starten, weil jeder ein Element erhalten muss und eine parallele Iteration eins auslassen könnte
+            {
+                worker.WorkerSupportsCancellation = true; // TODO Exception: worker war null
+                worker.DoWork += worker_DoWorkParallel;
+                worker.RunWorkerAsync(filePathsArray[i]); // löst do_work Event aus
+                i++;
+            }
+
+            // Wait for all backgroundworker, then...
+            
+        }
         private void worker_DoWorkParallel(object sender, DoWorkEventArgs e)
         {
-            string[] filePathsArray = filePaths.ToArray();
-            Task[] tasks = new Task[amountOfFiles];
-            for (int i = 0; i < amountOfFiles; i++)
-            {
-                // Die Dauer der Konvertierung hat hier kaum Einfluss auf die Laufzeit
-                tasks[i] = ConvertFile(filePathsArray[i]);
-                //tasks[i].Wait(50);
-            }
-            Task.WaitAll(tasks);
-            CancelVisibility = "Hidden";
-            InfoText = "Konvertierung abgeschlossen!";
-            // Um die Auswahl in der Kombobox für/ vor die nächste Auführung zu leeren
-            ComboBoxSelectedIndex = -1;
+            BackgroundWorker worker = sender as BackgroundWorker; // Get the BackgroundWorker that raised this event.
+            string filePath = e.Argument as string; // TODO was genau ist diese as? Cast von LINQ?
+            ConvertFileParallel(filePath);
+            // worker.ProgressChanged += worker_ProgressChanged; mach ich noch in der Convert Methode
+            worker.RunWorkerCompleted += worker_RunWorkerCompleted;
+            this.filePaths.Remove(filePath);
+
         }
 
-        private async Task ConvertFile(string file)
+        private void worker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            BackgroundWorker worker = sender as BackgroundWorker;
+            backgroundWorkers.Remove(worker); // Array und removen
+            worker.DoWork -= worker_DoWorkParallel;
+            worker.RunWorkerCompleted -= worker_RunWorkerCompleted;
+
+            if (backgroundWorkers.Count() == 0)
+            {
+            CancelVisibility = "Hidden";
+            InfoText = "Konvertierung abgeschlossen!";
+            ComboBoxSelectedIndex = -1; // Um die Auswahl in der Kombobox für/ vor die nächste Auführung zu leeren
+
+            }
+
+        }
+
+        //[Obsolete]
+        //private void worker_DoWorkSerial(object sender, DoWorkEventArgs e)
+        //{
+        //    string[] filePathsArray = filePaths.ToArray();
+        //    Task[] tasks = new Task[amountOfFiles];
+        //    for (int i = 0; i < amountOfFiles; i++)
+        //    {
+        //        tasks[i] = ConvertFileSerial(filePathsArray[i]);
+        //    }
+        //    Task.WaitAll(tasks);
+        //    CancelVisibility = "Hidden";
+        //    InfoText = "Konvertierung abgeschlossen!";
+        //    // Um die Auswahl in der Kombobox für/ vor die nächste Auführung zu leeren
+        //    ComboBoxSelectedIndex = -1;
+        //}
+        //[Obsolete]
+        //private async Task ConvertFileSerial(string file)
+        //{
+        //    ConvertingFile = file;
+        //    await Converter.ConvertAsync(file, Formats.Current, savingPath);
+        //    amountConvertedFiles++;
+        //    //  ConvertingProgress muss Zahl zwischen 0 und 100 zurückgeben
+        //    ConvertingProgress = (int)((Convert.ToDouble(amountConvertedFiles) / amountOfFiles) * 100);
+        //}
+        private void ConvertFileParallel(string file)
         {
             ConvertingFile = file;
-            await Converter.ConvertAsync(file, Formats.Current, savingPath);
+            Converter converter = new Converter();
+            converter.Convert(file, Formats.Current, savingPath); // Formats.Current wirft hier null
             amountConvertedFiles++;
             //  ConvertingProgress muss Zahl zwischen 0 und 100 zurückgeben
             ConvertingProgress = (int)((Convert.ToDouble(amountConvertedFiles) / amountOfFiles) * 100);
@@ -320,7 +380,7 @@ namespace FileConverter.ViewModel
                 InfoText = "";
                 ZielformatVisibility = "Visible";
                 ButtonVisibility = "Visible";
-                this.filePaths = filePaths;
+                this.filePaths = filePaths.ToList<string>();
             }
         }
         /// <summary>
