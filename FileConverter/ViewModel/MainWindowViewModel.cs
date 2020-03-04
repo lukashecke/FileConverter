@@ -276,8 +276,8 @@ namespace FileConverter.ViewModel
         private void ConvertFileParallel(string file)
         {
             ConvertingFile = file;
-            Converter converter = new Converter();
-            converter.Convert(file, Formats.Current, savingPath); // Formats.Current wirft hier null
+            Converter converter = new Converter(file, Formats.Current, savingPath);
+            converter.Convert(); // TODO Ändern!
             amountConvertedFiles++;
             //  ConvertingProgress muss Zahl zwischen 0 und 100 zurückgeben
             ConvertingProgress = (int)((Convert.ToDouble(amountConvertedFiles) / amountOfFiles) * 100);
