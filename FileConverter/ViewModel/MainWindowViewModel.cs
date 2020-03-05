@@ -108,14 +108,14 @@ namespace FileConverter.ViewModel
                 this.OnPropertyChanged("ZielformatVisibility");
             }
         }
-        private string infoText = "Bitte wähle deine Dateien aus.";
+        private string infoText = $"Bitte wähle deine Dateien aus,\roder ziehe sie links rein.";
         public string InfoText
         {
             get
             {
                 if (this.infoText == null)
                 {
-                    this.infoText = "Bitte wähle deine Dateien aus.";
+                    this.infoText = $"Bitte wähle deine Dateien aus,\roder ziehe sie links rein.";
                 }
                 return this.infoText;
             }
@@ -168,14 +168,14 @@ namespace FileConverter.ViewModel
                 this.OnPropertyChanged("ComboBoxSelectedIndex");
             }
         }
-        private ObservableCollection<string> fileNames = new ObservableCollection<string>() { "Hier reinziehen möglich." };
+        private ObservableCollection<string> fileNames = new ObservableCollection<string>() /*{ "Hier reinziehen möglich." }*/;
         public ObservableCollection<string> FileNames
         {
             get
             {
-                if (this.fileNames == null)
+                if (this.fileNames == null) // FallbackValue wird dadurch ausgeschlossen im View
                 {
-                    this.fileNames = new ObservableCollection<string>() { "Hier reinziehen möglich." };
+                    this.fileNames = new ObservableCollection<string>() /*{ "Hier reinziehen möglich." }*/;
                 }
                 return this.fileNames;
             }

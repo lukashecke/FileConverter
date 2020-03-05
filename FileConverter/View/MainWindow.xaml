@@ -11,6 +11,9 @@
         Background="LightGray"
         ResizeMode="NoResize"
         WindowStartupLocation="CenterScreen">
+    <Window.Resources>
+    <!--StaticResources-->
+    </Window.Resources>
     <Grid Name="Window">
         <Grid.RowDefinitions>
             <RowDefinition Height="11*"/>
@@ -36,6 +39,21 @@
                               HorizontalAlignment="Stretch"
                               VerticalAlignment="Stretch"
                               Margin="10,10,10,0">
+                        <ListView.Style>
+                            <Style TargetType="ListView">
+                                <Style.Triggers>
+                                    <Trigger Property="HasItems" Value="False">
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="ListView">
+                                                    <Image Source="/Images/hochladen.png"/>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ListView.Style>
                         <ListView.ItemContainerStyle>
                             <Style TargetType="ListViewItem">
                                 <Setter Property="IsHitTestVisible" Value="false"/>
@@ -64,7 +82,7 @@
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
                 <!--Dieses Label muss den "Zielformatcontrols" gemalt werden-->
-                <Label Content="{Binding InfoText}"
+                <Label Content="{Binding InfoText, UpdateSourceTrigger=PropertyChanged}"
                        Grid.Row="2"
                        HorizontalContentAlignment="Center"
                        HorizontalAlignment="Center" 
