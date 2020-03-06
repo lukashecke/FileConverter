@@ -46,7 +46,7 @@
                                         <Setter Property="Template">
                                             <Setter.Value>
                                                 <ControlTemplate TargetType="ListView">
-                                                    <Image Source="/Images/hochladen.png"/>
+                                                    <Image Source="/Images/hochladen.png" Margin="30"/>
                                                 </ControlTemplate>
                                             </Setter.Value>
                                         </Setter>
@@ -54,6 +54,16 @@
                                 </Style.Triggers>
                             </Style>
                         </ListView.Style>
+                        <ListView.Resources>
+
+                            <!--<Style  x:Key="Style1">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding FileNames}" Value="null">
+                                        <Setter Property="" lis Property="" Value="{StaticResource LeererEintrag}"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>-->
+                        </ListView.Resources>
                         <ListView.ItemContainerStyle>
                             <Style TargetType="ListViewItem">
                                 <Setter Property="IsHitTestVisible" Value="false"/>
