@@ -22,11 +22,8 @@ namespace FileConverter.ViewModel
     public class MainWindowViewModel : ViewModelBase
     {
         #region fields
+
         private static string savingPath = $@"C:\Users\{Environment.UserName.ToString().ToLower()}\Desktop\File Converter";
-        private List<string> filePaths;
-        private int amountConvertedFiles;
-        private int amountOfFiles;
-        private int amountAddedFiles;
         private List<BackgroundWorker> backgroundWorkers = new List<BackgroundWorker>();
         #endregion
 
@@ -37,6 +34,40 @@ namespace FileConverter.ViewModel
         #endregion
 
         #region entities
+        private ObservableCollection<string> oFiles;
+        public ObservableCollection<string> OFiles
+        {
+            get
+            {
+                if (this.oFiles == null)
+                {
+                    this.oFiles = new ObservableCollection<string>();
+                }
+                return this.oFiles;
+            }
+            set
+            {
+                this.oFiles = value;
+                this.OnPropertyChanged("OFiles");
+            }
+        }
+        private Files files;
+        public Files Files
+        {
+            get
+            {
+                if (this.files == null)
+                {
+                    this.files = new Files();
+                }
+                return this.files;
+            }
+            set
+            {
+                this.files = value;
+                this.OnPropertyChanged("Files");
+            }
+        }
         private ObservableCollectionEx<string> formats = new ObservableCollectionEx<string>();
         public ObservableCollectionEx<string> Formats
         {
@@ -105,6 +136,23 @@ namespace FileConverter.ViewModel
                 this.OnPropertyChanged("ZielformatVisibility");
             }
         }
+        private string spinnerVisibility = "Hidden";
+        public string SpinnerVisibility
+        {
+            get
+            {
+                if (this.spinnerVisibility == null)
+                {
+                    this.spinnerVisibility = "Hidden";
+                }
+                return this.spinnerVisibility;
+            }
+            set
+            {
+                this.spinnerVisibility = value;
+                this.OnPropertyChanged("SpinnerVisibility");
+            }
+        }
         private string infoText = $"Bitte wähle deine Dateien aus,\roder ziehe sie links rein.";
         public string InfoText
         {
@@ -165,28 +213,14 @@ namespace FileConverter.ViewModel
                 this.OnPropertyChanged("ComboBoxSelectedIndex");
             }
         }
-        private ObservableCollection<string> fileNames = new ObservableCollection<string>() /*{ "Hier reinziehen möglich." }*/;
-        public ObservableCollection<string> FileNames
-        {
-            get
-            {
-                if (this.fileNames == null) // FallbackValue wird dadurch ausgeschlossen im View
-                {
-                    this.fileNames = new ObservableCollection<string>() /*{ "Hier reinziehen möglich." }*/;
-                }
-                return this.fileNames;
-            }
-            set
-            {
-                this.fileNames = value;
-                this.OnPropertyChanged("FileNames");
-            }
-        }
+
         #endregion
 
         #region constructors
         public MainWindowViewModel()
         {
+            Files = new Files();
+
             this.BrowseCommand = new RelayCommand(ExecuteBrowseCommand, CanExecuteBrowse);
             this.ConvertCommand = new RelayCommand(ExecuteConvertCommand, CanExecuteConvert);
             this.CancelCommand = new RelayCommand(ExecuteCancelCommand, CanExecuteCancel);
@@ -226,10 +260,10 @@ namespace FileConverter.ViewModel
             if (gettedFilePaths.Count() > 0)
             {
                 // Wenn Dateien ausgewählt wurden soll der Defaultwert gelöscht werden
-                FileNames.Clear();
+                Files.FileNames.Clear();
                 // TODO Text wird noch nicht aktualisiert
                 InfoText = "Dateien werden geladen...";
-                AddFiles(gettedFilePaths);
+                AddFiles(gettedFilePaths.ToList<string>());
             }
             //// TODO "Dateien werden geladen..."
             //BackgroundWorker worker = new BackgroundWorker();
@@ -241,18 +275,18 @@ namespace FileConverter.ViewModel
         {
             backgroundWorkers.Clear(); // Nach einem Abbruch bleiben diese sonst auf altem Wert, was in der Schleife zu fehlern führen kann
             CreateSavingDirectory();
-            amountConvertedFiles = 0;
-            amountOfFiles = filePaths.Count;
+            Files.amountConvertedFiles = 0;
+            Files.amountOfFiles = Files.FileNames.Count;
             ButtonVisibility = "Hidden";
             ZielformatVisibility = "Hidden";
             InfoText = "Konvertierung läuft...";
             CancelVisibility = "Visible";
 
-            string[] filePathsArray = filePaths.ToArray();
+            string[] filePathsArray = Files.filePaths.ToArray();
 
             // Früher einen BackgroundWorker gestartet, der DoWorkSerial ausführt
             // Muss passieren sonst bleiben die Backgroundworker null
-            for (int j = 0; j < amountOfFiles; j++)
+            for (int j = 0; j < Files.amountOfFiles; j++)
             {
                 backgroundWorkers.Add(new BackgroundWorker());// BackgroundWorker quasi grafische Threads // liste aus backgroundworkern für jede konvertierung 1
             }
@@ -261,7 +295,7 @@ namespace FileConverter.ViewModel
             foreach (var worker in backgroundWorkers) // Nicht parallel starten, weil jeder ein Element erhalten muss und eine parallele Iteration eins auslassen könnte
             {
                 worker.WorkerSupportsCancellation = true;
-                worker.DoWork += worker_ConvertFile;
+                worker.DoWork += worker_ConvertFile; // Hier pure Anmeldung
                 worker.RunWorkerAsync(filePathsArray[i]); // löst do_work Event aus
                 i++;
             }
@@ -279,7 +313,7 @@ namespace FileConverter.ViewModel
         }
         #endregion
 
-        #region delegates
+        #region event
         private void worker_ConvertFile(object sender, DoWorkEventArgs e)
         {
             BackgroundWorker worker = sender as BackgroundWorker; // Get the BackgroundWorker that raised this event.
@@ -292,12 +326,14 @@ namespace FileConverter.ViewModel
             ConvertFileParallel(filePath);
             // worker.ProgressChanged += worker_ProgressChanged; mach ich noch in der Convert Methode
             worker.RunWorkerCompleted += worker_ConvertingCompleted;
-            this.filePaths.Remove(filePath);
+            Files.filePaths.Remove(filePath);
         }
         private void worker_ConvertingCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
+            // TODO 
             BackgroundWorker worker = sender as BackgroundWorker;
             backgroundWorkers.Remove(worker); // Array und removen
+            // TODO disposen? -> Anschauen! 
             worker.DoWork -= worker_ConvertFile;
             worker.RunWorkerCompleted -= worker_ConvertingCompleted;
 
@@ -305,6 +341,7 @@ namespace FileConverter.ViewModel
             {
                 CancelVisibility = "Hidden";
                 InfoText = "Konvertierung abgeschlossen!";
+                // TODO lsite soll hier geleert werden worker eventuell aucuh und nicht erst bei bzw vor einer neukonvertierung
                 ComboBoxSelectedIndex = -1; // Um die Auswahl in der Kombobox für/ vor die nächste Auführung zu leeren
             }
         }
@@ -317,54 +354,51 @@ namespace FileConverter.ViewModel
                 return;
             }
             string file = e.Argument as string;
-            // TODO WTF!? Und ist damit die parallelisierung hin?
-            Application.Current.Dispatcher.Invoke(
-  DispatcherPriority.Send,
-  new Action(() => FileNames.Add(Path.GetFileName(file))));
+            Files.FileNames.Add(Path.GetFileName(file));
 
 
+            // FileNames.Add(Path.GetFileName(file));
 
             //  TODO wohin damit, dass es funktioniert?
-            // ConvertingProgress = (int)((Convert.ToDouble(amountAddedFiles - backgroundWorkers.Count) / amountAddedFiles) * 100);
-
-
             //var debug = (int)((Convert.ToDouble(amountAddedFiles - backgroundWorkers.Count) / amountAddedFiles) * 100);
             worker.RunWorkerCompleted += worker_LoadingCompleted;
         }
+
         private void worker_LoadingCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
+            BackgroundWorker worker = sender as BackgroundWorker;
+            backgroundWorkers.Remove(worker); // Array und removen
+            worker.DoWork -= worker_LoadFile;
+
+            worker.RunWorkerCompleted -= worker_LoadingCompleted;
+
+            if (backgroundWorkers.Count() == 0) // Wait for all backgroundworker, then...
             {
-                BackgroundWorker worker = sender as BackgroundWorker;
-                backgroundWorkers.Remove(worker); // Array und removen
-                worker.DoWork -= worker_LoadFile;
-
-                worker.RunWorkerCompleted -= worker_LoadingCompleted;
-
-                if (backgroundWorkers.Count() == 0) // Wait for all backgroundworker, then...
+                // TODO Hiermit werden Dispatcherprobleme umgangen
+                OFiles = new ObservableCollection<string>(Files.FileNames);
+                SpinnerVisibility = "Hidden";
+                foreach (var file in Files.FileNames)
                 {
-                    foreach (var file in filePaths)
+                    bool allSameFormat = false;
+                    allSameFormat = CheckIfSameFormats(Files.FileNames.ToArray());
+                    if (!allSameFormat)
                     {
-                        bool allSameFormat = false;
-                        allSameFormat = CheckIfSameFormats(filePaths.ToArray());
-                        if (!allSameFormat)
-                        {
-                            break;
-                        }
-
-                        // Zielformatwahl erscheinen lassen, soweit konvertierungsgeeignete Dateien ausgewählt
-                        if (!Formats.Contains(Path.GetExtension(file).ToLower().Trim('.')))
-                        {
-                            MessageBox.Show("Die Konvertierung des ausgewählten Dateiformats wird leider noch nicht unterstützt.", "Konvertierung nicht möglich");
-                            ZielformatVisibility = "Hidden";
-                            break;
-                        }
-                        // Da nach erster Ausführung auf "Visible"
-                        InfoText = "";
-                        ZielformatVisibility = "Visible";
-                        ButtonVisibility = "Visible";
-                        // TODO Uncommend?
-                        // this.filePaths = filePaths.ToList<string>();
+                        break;
                     }
+
+                    // Zielformatwahl erscheinen lassen, soweit konvertierungsgeeignete Dateien ausgewählt
+                    if (!Formats.Contains(Path.GetExtension(file).ToLower().Trim('.')))
+                    {
+                        MessageBox.Show("Die Konvertierung des ausgewählten Dateiformats wird leider noch nicht unterstützt.", "Konvertierung nicht möglich");
+                        ZielformatVisibility = "Hidden";
+                        break;
+                    }
+                    // Da nach erster Ausführung auf "Visible"
+                    InfoText = "";
+                    ZielformatVisibility = "Visible";
+                    ButtonVisibility = "Visible";
+                    // TODO Uncommend?
+                    // this.filePaths = filePaths.ToList<string>();
                 }
             }
         }
@@ -376,42 +410,54 @@ namespace FileConverter.ViewModel
             ConvertingFile = file;
             Converter converter = new Converter(file, Formats.Current, savingPath);
             converter.Convert(); // TODO Ändern!
-            amountConvertedFiles++;
-            Methode();
+            Files.amountConvertedFiles++;
+            //  ConvertingProgress muss Zahl zwischen 0 und 100 zurückgeben
+            ConvertingProgress = (int)((Convert.ToDouble(Files.amountConvertedFiles) / Files.amountOfFiles) * 100);
         }
         /// <summary>
         /// Gemeinsame Funktion für das hinzufügen von Dateien per Drag und Drop oder Browserauswahl
         /// </summary>
         /// <param name="filePaths"></param>
-        public void AddFiles(string[] filePaths) // TODO Hocchladestatus
+        public void AddFiles(List<string> filePaths) // TODO Hocchladestatus
         {
-            amountAddedFiles = filePaths.Length;
-            string[] filePathsArray = filePaths.ToArray();
-            this.filePaths = filePaths.ToList<string>();
+            // NIE WIEDER LÖSCHEN!!!!!
+            Files.filePaths = filePaths;  
+            // TODO HILFE!
+            //Application.Current.Dispatcher.Invoke((Action)(() => { Help(filePaths); }));
+
+            // Task.Factory.StartNew(() => { Help(filePaths); });
+
+            //thread = new Thread(new ThreadStart(() => Help(filePaths)));
+            //thread.Start();
 
             // Muss passieren sonst bleiben die Backgroundworker null
-            for (int j = 0; j < amountAddedFiles; j++)
+            Files.amountAddedFiles = filePaths.Count();
+            for (int j = 0; j < Files.amountAddedFiles; j++)
             {
                 backgroundWorkers.Add(new BackgroundWorker());
             }
 
             int i = 0;
+
             foreach (var worker in backgroundWorkers) // Die ListView soll gefüllt werden, auch wenn die Konvertierung nicht stattfinden kann, damit der Benutzer seine Eingabe überprüfen kann
             {
                 worker.WorkerSupportsCancellation = true;
                 worker.DoWork += worker_LoadFile;
-                worker.RunWorkerAsync(filePathsArray[i]); // löst do_work Event aus
+                worker.RunWorkerAsync(filePaths.ToArray()[i]); // löst do_work Event aus
                 i++;
             }
+        }
+
+        private void Help(List<string> filePaths)
+        {
+            SpinnerVisibility = "Visible";
+            Files.amountAddedFiles = filePaths.Count;
+            //string[] filePathsArray = filePaths.ToArray();
+            this.Files.FileNames = filePaths;
         }
         #endregion
 
         #region auxiliary functions
-        private void Methode()
-        {
-            //  ConvertingProgress muss Zahl zwischen 0 und 100 zurückgeben
-            ConvertingProgress = (int)((Convert.ToDouble(amountConvertedFiles) / amountOfFiles) * 100);
-        }
         private void CreateSavingDirectory()
         {
             Directory.CreateDirectory(savingPath);
@@ -428,7 +474,7 @@ namespace FileConverter.ViewModel
                 // TODO Zur Laufzeit werden irgendwo noch Dateien blockiert!
                 // TODO Erklärung?
                 // Die erste Datei MUSS UMBEDINGT separat in eine Variable abgespeichert werden, damit diese wieder freigegeben wird. Wird im if durch FileNames.First() abgefragt, bleibt die erste datei zur Laufszeit des Programms gesperrt.
-                string firstFile = FileNames.First();
+                string firstFile = Files.FileNames.First();
                 if (!Path.GetExtension(file).ToLower().Trim('.').Equals(Path.GetExtension(firstFile).ToLower().Trim('.'))) // Prüfen, ob alle Dateien das selbe Format besitzen
                 {
                     MessageBox.Show("Nicht alle deiner Dateien besitzen das selbe Format.", "Unterschiedliche Formate");

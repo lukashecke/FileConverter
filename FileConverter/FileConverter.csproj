@@ -61,6 +61,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Page Include="ucSpinner.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="View\MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -71,7 +75,12 @@
     </Compile>
     <Compile Include="Commands\RelayCommand.cs" />
     <Compile Include="Model\Converter.cs" />
+    <Compile Include="Model\Files.cs" />
     <Compile Include="Model\ObservableCollectionEx.cs" />
+    <Compile Include="Model\ModelBase.cs" />
+    <Compile Include="ucSpinner.xaml.cs">
+      <DependentUpon>ucSpinner.xaml</DependentUpon>
+    </Compile>
     <Compile Include="ViewModel\MainWindowViewModel.cs" />
     <Compile Include="ViewModel\ViewModelBase.cs" />
     <Compile Include="View\MainWindow.xaml.cs">

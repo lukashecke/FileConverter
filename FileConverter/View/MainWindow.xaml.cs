@@ -10,6 +10,7 @@ namespace FileConverter
     /// </summary>
     public partial class MainWindow : Window
     {
+
         public MainWindow()
         {
             this.DataContext = new MainWindowViewModel();
@@ -22,7 +23,7 @@ namespace FileConverter
             ((MainWindowViewModel)this.DataContext).InfoText = "Dateien werden geladen...";
             if (e.Data.GetDataPresent(DataFormats.FileDrop))
             {
-                ((MainWindowViewModel)this.DataContext).FileNames.Clear();
+                ((MainWindowViewModel)this.DataContext).Files.FileNames.Clear();
 
                 string[] droppedFilePaths =
                 e.Data.GetData(DataFormats.FileDrop, true) as string[];
@@ -40,7 +41,7 @@ namespace FileConverter
                         temp.Add(path);
                     }
                 }
-               ((MainWindowViewModel)this.DataContext).AddFiles(temp.ToArray());
+               ((MainWindowViewModel)this.DataContext).AddFiles(temp);
             }
         }
     }

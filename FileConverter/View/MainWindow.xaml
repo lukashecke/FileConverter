@@ -12,7 +12,7 @@
         ResizeMode="NoResize"
         WindowStartupLocation="CenterScreen">
     <Window.Resources>
-    <!--StaticResources-->
+        <!--StaticResources-->
     </Window.Resources>
     <Grid Name="Window">
         <Grid.RowDefinitions>
@@ -31,7 +31,7 @@
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
                 <Grid>
-                    <ListView ItemsSource="{Binding FileNames}"
+                    <ListView ItemsSource="{Binding OFiles}"
                               Drop="ListBox_Drop"
                               AllowDrop="True"
                               Focusable="False"
@@ -98,6 +98,13 @@
                        HorizontalAlignment="Center" 
                        VerticalAlignment="Center">
                 </Label>
+                <Grid Grid.Row="3">
+                    <local:ucSpinner HorizontalAlignment="Center" 
+                                     Margin="0,9,-17,11"
+                                     Width="24" 
+                                     VerticalAlignment="Center"
+                                     Visibility="{Binding SpinnerVisibility}"/>
+                </Grid>
                 <Label Content="Zielformat auswählen" 
                        Visibility="{Binding ZielformatVisibility}" 
                        Grid.Row="1"
