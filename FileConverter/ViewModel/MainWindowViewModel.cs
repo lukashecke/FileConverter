@@ -22,8 +22,7 @@ namespace FileConverter.ViewModel
     public class MainWindowViewModel : ViewModelBase
     {
         #region fields
-
-        private static string savingPath = $@"C:\Users\{Environment.UserName.ToString().ToLower()}\Desktop\File Converter";
+        private static readonly string savingPath = $@"C:\Users\{Environment.UserName.ToString().ToLower()}\Desktop\File Converter";
         private List<BackgroundWorker> backgroundWorkers = new List<BackgroundWorker>();
         #endregion
 
@@ -215,7 +214,6 @@ namespace FileConverter.ViewModel
                 this.OnPropertyChanged("ComboBoxSelectedIndex");
             }
         }
-
         #endregion
 
         #region constructors
@@ -227,6 +225,7 @@ namespace FileConverter.ViewModel
             this.ConvertCommand = new RelayCommand(ExecuteConvertCommand, CanExecuteConvert);
             this.CancelCommand = new RelayCommand(ExecuteCancelCommand, CanExecuteCancel);
             this.NewCommand = new RelayCommand(ExecutNewCommand, CanExecuteNew);
+            // Hier werden bislang die Möglichen Konvertierungsformate festgehalten
             formats.Add("png");
             formats.Add("jpg");
             formats.Add("bmp");
@@ -326,7 +325,6 @@ namespace FileConverter.ViewModel
         }
         private void worker_ConvertingCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
-            // TODO 
             BackgroundWorker worker = sender as BackgroundWorker;
             backgroundWorkers.Remove(worker); // Array und removen
             // TODO disposen? -> Anschauen! 
@@ -338,7 +336,6 @@ namespace FileConverter.ViewModel
                 CancelVisibility = "Hidden";
                 InfoText = "Konvertierung abgeschlossen.";
                 NewVisibility = "Visible";
-                // TODO lsite soll hier geleert werden worker eventuell aucuh und nicht erst bei bzw vor einer neukonvertierung
                 ComboBoxSelectedIndex = -1; // Um die Auswahl in der Kombobox für/ vor die nächste Auführung zu leeren
             }
         }
@@ -349,7 +346,7 @@ namespace FileConverter.ViewModel
         {
             ConvertingFile = file;
             Converter converter = new Converter(file, Formats.Current, savingPath);
-            converter.Convert(); // TODO Ändern!
+            converter.Convert();
             Files.amountConvertedFiles++;
             // ConvertingProgress muss Zahl zwischen 0 und 100 zurückgeben
             ConvertingProgress = (int)((Convert.ToDouble(Files.amountConvertedFiles) / Files.amountOfFiles) * 100);
@@ -445,13 +442,11 @@ namespace FileConverter.ViewModel
         /// </summary>
         /// <param name="filePaths"></param>
         /// <returns></returns>
-        private bool CheckIfSameFormats(List<string> filePaths) // TODO einzelne Files hier ab und zu noch null
+        private bool CheckIfSameFormats(List<string> filePaths)
         {
             foreach (var file in filePaths)
             {
-                // TODO Zur Laufzeit werden irgendwo noch Dateien blockiert!
-                // TODO Erklärung?
-                // Die erste Datei MUSS UMBEDINGT separat in eine Variable abgespeichert werden, damit diese wieder freigegeben wird. Wird im if durch FileNames.First() abgefragt, bleibt die erste datei zur Laufszeit des Programms gesperrt.
+                // TODO Erklärung: Zur Laufzeit werden irgendwo noch Dateien blockiert! Auch bei der zweiten Überpfrüfungsmethode? Halbes Workaround: Die erste Datei MUSS UMBEDINGT separat in eine Variable abgespeichert werden, damit diese wieder freigegeben wird. Wird im if durch FileNames.First() abgefragt, bleibt die erste datei zur Laufszeit des Programms gesperrt.
                 string firstFile = Files.FilePaths.First();
                 if (!Path.GetExtension(file).ToLower().Trim('.').Equals(Path.GetExtension(firstFile).ToLower().Trim('.'))) // Prüfen, ob alle Dateien das selbe Format besitzen
                 {
@@ -461,12 +456,7 @@ namespace FileConverter.ViewModel
             return true;
         }
         private bool CheckIfSupportedFormats(List<string> filePaths)
-        {
-            // TODO Zur Laufzeit werden irgendwo noch Dateien blockiert!
-            // TODO Erklärung?
-            // Die erste Datei MUSS UMBEDINGT separat in eine Variable abgespeichert werden, damit diese wieder freigegeben wird. Wird im if durch FileNames.First() abgefragt, bleibt die erste datei zur Laufszeit des Programms gesperrt.
-            string firstFile = Files.FilePaths.First();
-
+        {string firstFile = Files.FilePaths.First();
             if (Formats.Contains(Path.GetExtension(firstFile).ToLower().Trim('.')))
             {
                 return true;
