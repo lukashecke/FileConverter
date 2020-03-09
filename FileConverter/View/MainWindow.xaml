@@ -55,14 +55,6 @@
                             </Style>
                         </ListView.Style>
                         <ListView.Resources>
-
-                            <!--<Style  x:Key="Style1">
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding FileNames}" Value="null">
-                                        <Setter Property="" lis Property="" Value="{StaticResource LeererEintrag}"/>
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>-->
                         </ListView.Resources>
                         <ListView.ItemContainerStyle>
                             <Style TargetType="ListViewItem">

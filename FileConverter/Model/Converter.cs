@@ -20,10 +20,6 @@ namespace FileConverter.Model
         private string format;
         private string savingPath;
 
-        private void ExecuteConversion()
-        {
-
-        }
         public Converter(string filePath, string format, string savingPath)
         {
             this.filePath = filePath;
