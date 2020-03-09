@@ -23,7 +23,8 @@ namespace FileConverter
             ((MainWindowViewModel)this.DataContext).InfoText = "Dateien werden geladen...";
             if (e.Data.GetDataPresent(DataFormats.FileDrop))
             {
-                ((MainWindowViewModel)this.DataContext).Files.FileNames.Clear();
+                // Dateienliste aus vorherigem Durchlauf löschen
+                ((MainWindowViewModel)this.DataContext).Files.FilePaths.Clear();
 
                 string[] droppedFilePaths =
                 e.Data.GetData(DataFormats.FileDrop, true) as string[];

@@ -10,28 +10,28 @@ namespace FileConverter.Model
 {
     public class Files : ModelBase
     {
-        public List<string> filePaths;
         public int amountConvertedFiles;
         public int amountAddedFiles;
         public int amountOfFiles;
 
-
-
-        private List<string> fileNames = new List<string>() /*{ "Hier reinziehen möglich." }*/;
-        public List<string> FileNames
+        private List<string> filePaths = new List<string>();
+        /// <summary>
+        /// Nur die Namen der zu konvertierenden Dateien. Wird zur Anzeige benutzt und nach dem einlesen in eine ObservableCollection gecastet.
+        /// </summary>
+        public List<string> FilePaths
         {
             get
             {
-                if (this.fileNames == null) // FallbackValue wird dadurch ausgeschlossen im View
+                if (this.filePaths == null) // FallbackValue wird dadurch ausgeschlossen im View
                 {
-                    this.fileNames = new List<string>() /*{ "Hier reinziehen möglich." }*/;
+                    this.filePaths = new List<string>();
                 }
-                return this.fileNames;
+                return this.filePaths;
             }
             set
             {
-                this.fileNames = value;
-                this.OnPropertyChanged("FileNames");
+                this.filePaths = value;
+                this.OnPropertyChanged("FilePaths");
             }
         }
 

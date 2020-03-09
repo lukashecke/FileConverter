@@ -259,8 +259,8 @@ namespace FileConverter.ViewModel
             }
             if (gettedFilePaths.Count() > 0)
             {
-                // Wenn Dateien ausgewählt wurden soll der Defaultwert gelöscht werden
-                Files.FileNames.Clear();
+                // Dateien vom vorherigen Durchlauf entfernen
+                Files.FilePaths.Clear();
                 // TODO Text wird noch nicht aktualisiert
                 InfoText = "Dateien werden geladen...";
                 AddFiles(gettedFilePaths.ToList<string>());
@@ -276,13 +276,13 @@ namespace FileConverter.ViewModel
             backgroundWorkers.Clear(); // Nach einem Abbruch bleiben diese sonst auf altem Wert, was in der Schleife zu fehlern führen kann
             CreateSavingDirectory();
             Files.amountConvertedFiles = 0;
-            Files.amountOfFiles = Files.FileNames.Count;
+            Files.amountOfFiles = Files.FilePaths.Count;
             ButtonVisibility = "Hidden";
             ZielformatVisibility = "Hidden";
             InfoText = "Konvertierung läuft...";
             CancelVisibility = "Visible";
 
-            string[] filePathsArray = Files.filePaths.ToArray();
+            string[] filePathsArray = Files.FilePaths.ToArray();
 
             // Früher einen BackgroundWorker gestartet, der DoWorkSerial ausführt
             // Muss passieren sonst bleiben die Backgroundworker null
@@ -326,7 +326,7 @@ namespace FileConverter.ViewModel
             ConvertFileParallel(filePath);
             // worker.ProgressChanged += worker_ProgressChanged; mach ich noch in der Convert Methode
             worker.RunWorkerCompleted += worker_ConvertingCompleted;
-            Files.filePaths.Remove(filePath);
+            Files.FilePaths.Remove(filePath);
         }
         private void worker_ConvertingCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
@@ -354,7 +354,7 @@ namespace FileConverter.ViewModel
                 return;
             }
             string file = e.Argument as string;
-            Files.FileNames.Add(Path.GetFileName(file));
+            Files.FilePaths.Add(Path.GetFileName(file));
 
 
             // FileNames.Add(Path.GetFileName(file));
@@ -374,13 +374,14 @@ namespace FileConverter.ViewModel
 
             if (backgroundWorkers.Count() == 0) // Wait for all backgroundworker, then...
             {
+                List<string> fileNames = GetNames(Files.FilePaths);
                 // TODO Hiermit werden Dispatcherprobleme umgangen
-                OFiles = new ObservableCollection<string>(Files.FileNames);
+                OFiles = new ObservableCollection<string>(fileNames);
                 SpinnerVisibility = "Hidden";
-                foreach (var file in Files.FileNames)
+                foreach (var file in fileNames)
                 {
                     bool allSameFormat = false;
-                    allSameFormat = CheckIfSameFormats(Files.FileNames.ToArray());
+                    allSameFormat = CheckIfSameFormats(fileNames.ToArray());
                     if (!allSameFormat)
                     {
                         break;
@@ -397,10 +398,23 @@ namespace FileConverter.ViewModel
                     InfoText = "";
                     ZielformatVisibility = "Visible";
                     ButtonVisibility = "Visible";
-                    // TODO Uncommend?
-                    // this.filePaths = filePaths.ToList<string>();
                 }
             }
+        }
+
+        /// <summary>
+        /// Gibt die Liste mit nur den Namen der Dateien zurück.
+        /// </summary>
+        /// <param name="fileNames"></param>
+        /// <returns></returns>
+        private List<string> GetNames(List<string> fileNames)
+        {
+            List<string> temp = new List<string>();
+            foreach (var file in fileNames)
+            {
+                temp.Add(Path.GetFileName(file));
+            }
+            return temp;
         }
         #endregion
 
@@ -418,10 +432,10 @@ namespace FileConverter.ViewModel
         /// Gemeinsame Funktion für das hinzufügen von Dateien per Drag und Drop oder Browserauswahl
         /// </summary>
         /// <param name="filePaths"></param>
-        public void AddFiles(List<string> filePaths) // TODO Hocchladestatus
+        public void AddFiles(List<string> filePaths)
         {
             // NIE WIEDER LÖSCHEN!!!!!
-            Files.filePaths = filePaths;  
+            Files.FilePaths = filePaths;  
             // TODO HILFE!
             //Application.Current.Dispatcher.Invoke((Action)(() => { Help(filePaths); }));
 
@@ -431,7 +445,7 @@ namespace FileConverter.ViewModel
             //thread.Start();
 
             // Muss passieren sonst bleiben die Backgroundworker null
-            Files.amountAddedFiles = filePaths.Count();
+            Files.amountAddedFiles = Files.FilePaths.Count();
             for (int j = 0; j < Files.amountAddedFiles; j++)
             {
                 backgroundWorkers.Add(new BackgroundWorker());
@@ -443,18 +457,18 @@ namespace FileConverter.ViewModel
             {
                 worker.WorkerSupportsCancellation = true;
                 worker.DoWork += worker_LoadFile;
-                worker.RunWorkerAsync(filePaths.ToArray()[i]); // löst do_work Event aus
+                worker.RunWorkerAsync(Files.FilePaths.ToArray()[i]); // löst do_work Event aus
                 i++;
             }
         }
-
-        private void Help(List<string> filePaths)
-        {
-            SpinnerVisibility = "Visible";
-            Files.amountAddedFiles = filePaths.Count;
-            //string[] filePathsArray = filePaths.ToArray();
-            this.Files.FileNames = filePaths;
-        }
+        // TODO was ist damit????
+        //private void Help(List<string> filePaths)
+        //{
+        //    SpinnerVisibility = "Visible";
+        //    Files.amountAddedFiles = filePaths.Count;
+        //    //string[] filePathsArray = filePaths.ToArray();
+        //    this.Files.FileNames = filePaths;
+        //}
         #endregion
 
         #region auxiliary functions
@@ -467,14 +481,14 @@ namespace FileConverter.ViewModel
         /// </summary>
         /// <param name="filePaths"></param>
         /// <returns></returns>
-        private bool CheckIfSameFormats(string[] filePaths)
+        private bool CheckIfSameFormats(string[] filePaths) // TODO einzelne Files hier ab und zu noch null
         {
             foreach (var file in filePaths)
             {
                 // TODO Zur Laufzeit werden irgendwo noch Dateien blockiert!
                 // TODO Erklärung?
                 // Die erste Datei MUSS UMBEDINGT separat in eine Variable abgespeichert werden, damit diese wieder freigegeben wird. Wird im if durch FileNames.First() abgefragt, bleibt die erste datei zur Laufszeit des Programms gesperrt.
-                string firstFile = Files.FileNames.First();
+                string firstFile = Files.FilePaths.First();
                 if (!Path.GetExtension(file).ToLower().Trim('.').Equals(Path.GetExtension(firstFile).ToLower().Trim('.'))) // Prüfen, ob alle Dateien das selbe Format besitzen
                 {
                     MessageBox.Show("Nicht alle deiner Dateien besitzen das selbe Format.", "Unterschiedliche Formate");
