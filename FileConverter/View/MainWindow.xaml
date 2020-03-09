@@ -132,6 +132,15 @@
                         HorizontalAlignment="Center" 
                         VerticalAlignment="Bottom">
                 </Button>
+                <Button Content="Neue Konvertierung" 
+                        Command="{Binding NewCommand}"
+                        Visibility="{Binding NewVisibility}"
+                        Grid.Row="3"
+                        Height="30"
+                        Width="100" 
+                        HorizontalAlignment="Center" 
+                        VerticalAlignment="Bottom">
+                </Button>
                 <Label Content="© 2020 Lukas Hecke"
                        FontSize="8"
                        Grid.Row="5"

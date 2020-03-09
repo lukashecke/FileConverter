@@ -31,6 +31,7 @@ namespace FileConverter.ViewModel
         public ICommand BrowseCommand { get; set; }
         public ICommand ConvertCommand { get; set; }
         public ICommand CancelCommand { get; set; }
+        public ICommand NewCommand { get; set; }
         #endregion
 
         #region entities
@@ -100,6 +101,23 @@ namespace FileConverter.ViewModel
             {
                 this.buttonVisibility = value;
                 this.OnPropertyChanged("ButtonVisibility");
+            }
+        }
+        private string newVisibility = "Hidden";
+        public string NewVisibility
+        {
+            get
+            {
+                if (this.newVisibility == null)
+                {
+                    this.newVisibility = "Hidden";
+                }
+                return this.newVisibility;
+            }
+            set
+            {
+                this.newVisibility = value;
+                this.OnPropertyChanged("NewVisibility");
             }
         }
         private string cancelVisibility = "Hidden";
@@ -208,6 +226,7 @@ namespace FileConverter.ViewModel
             this.BrowseCommand = new RelayCommand(ExecuteBrowseCommand, CanExecuteBrowse);
             this.ConvertCommand = new RelayCommand(ExecuteConvertCommand, CanExecuteConvert);
             this.CancelCommand = new RelayCommand(ExecuteCancelCommand, CanExecuteCancel);
+            this.NewCommand = new RelayCommand(ExecutNewCommand, CanExecuteNew);
             formats.Add("png");
             formats.Add("jpg");
             formats.Add("bmp");
@@ -217,6 +236,17 @@ namespace FileConverter.ViewModel
         #endregion
 
         #region commands
+        private void ExecutNewCommand(object obj)
+        {
+            ButtonVisibility = "Hidden";
+            ZielformatVisibility = "Hidden";
+            ConvertingProgress = 0;
+            ConvertingFile = "";
+            Files.FilePaths.Clear();
+            OFiles = new ObservableCollection<string>(GetNames(Files.FilePaths));
+            NewVisibility = "Hidden";
+            InfoText = null; // auf Default zurücksetzen
+        }
         public void ExecuteBrowseCommand(object param)
         {
             string[] gettedFilePaths = new string[0];
@@ -275,6 +305,7 @@ namespace FileConverter.ViewModel
             }
             InfoText = "Die Konvertierung wurde abgebrochen";
             CancelVisibility = "Hidden";
+            NewVisibility = "Visible";
             ComboBoxSelectedIndex = -1; // Um die Auswahl in der Kombobox für/ vor die nächste Auführung zu leeren
         }
         #endregion
@@ -306,6 +337,7 @@ namespace FileConverter.ViewModel
             {
                 CancelVisibility = "Hidden";
                 InfoText = "Konvertierung abgeschlossen!";
+                NewVisibility = "Visible";
                 // TODO lsite soll hier geleert werden worker eventuell aucuh und nicht erst bei bzw vor einer neukonvertierung
                 ComboBoxSelectedIndex = -1; // Um die Auswahl in der Kombobox für/ vor die nächste Auführung zu leeren
             }
@@ -339,6 +371,9 @@ namespace FileConverter.ViewModel
             ZielformatVisibility = "Visible";
             ButtonVisibility = "Visible";
             InfoText = "Hidden";
+            NewVisibility = "Hidden";
+            ConvertingProgress = 0;
+            ConvertingFile = "";
         }
         public void SearchFiles(string path)
         {
@@ -413,6 +448,10 @@ namespace FileConverter.ViewModel
             return false;
         }
         public bool CanExecuteBrowse(object param)
+        {
+            return true;
+        }
+        private bool CanExecuteNew(object arg)
         {
             return true;
         }
