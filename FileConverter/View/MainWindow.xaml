@@ -98,13 +98,6 @@
                        HorizontalAlignment="Center" 
                        VerticalAlignment="Center">
                 </Label>
-                <Grid Grid.Row="3">
-                    <local:ucSpinner HorizontalAlignment="Center" 
-                                     Margin="0,9,-17,11"
-                                     Width="24" 
-                                     VerticalAlignment="Center"
-                                     Visibility="{Binding SpinnerVisibility}"/>
-                </Grid>
                 <Label Content="Zielformat auswählen" 
                        Visibility="{Binding ZielformatVisibility}" 
                        Grid.Row="1"

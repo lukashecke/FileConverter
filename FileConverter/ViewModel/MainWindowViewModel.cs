@@ -235,18 +235,11 @@ namespace FileConverter.ViewModel
         #region commands
         public void ExecuteBrowseCommand(object param)
         {
-            //Task t = new Task(() =>
-            //{
-            //    InfoText = "Dateien werden geladen...";
-            //});
-            //t.Start();
-            //Task.WaitAll(t);
             string[] gettedFilePaths = new string[0];
             OpenFileDialog openFileDialog = new OpenFileDialog();
             openFileDialog.Multiselect = true;
             if (openFileDialog.ShowDialog() == true)
             {
-
                 // Array mit der richtigen Länge deklarieren
                 gettedFilePaths = new string[openFileDialog.FileNames.Length];
                 int j = 0;
@@ -261,15 +254,8 @@ namespace FileConverter.ViewModel
             {
                 // Dateien vom vorherigen Durchlauf entfernen
                 Files.FilePaths.Clear();
-                // TODO Text wird noch nicht aktualisiert
-                InfoText = "Dateien werden geladen...";
-                AddFiles(gettedFilePaths.ToList<string>());
+                AddFiles(gettedFilePaths);
             }
-            //// TODO "Dateien werden geladen..."
-            //BackgroundWorker worker = new BackgroundWorker();
-            //worker.DoWork += worker_executeBrowse;
-            //worker.RunWorkerAsync();
-            //InfoText = "Dateien werden geladen...";
         }
         private void ExecuteConvertCommand(object obj)
         {
@@ -283,26 +269,22 @@ namespace FileConverter.ViewModel
             CancelVisibility = "Visible";
 
             string[] filePathsArray = Files.FilePaths.ToArray();
-
-            // Früher einen BackgroundWorker gestartet, der DoWorkSerial ausführt
-            // Muss passieren sonst bleiben die Backgroundworker null
             for (int j = 0; j < Files.amountOfFiles; j++)
             {
-                backgroundWorkers.Add(new BackgroundWorker());// BackgroundWorker quasi grafische Threads // liste aus backgroundworkern für jede konvertierung 1
+                backgroundWorkers.Add(new BackgroundWorker()); // Muss passieren sonst bleiben die Backgroundworker null
             }
 
             int i = 0;
             foreach (var worker in backgroundWorkers) // Nicht parallel starten, weil jeder ein Element erhalten muss und eine parallele Iteration eins auslassen könnte
             {
                 worker.WorkerSupportsCancellation = true;
-                worker.DoWork += worker_ConvertFile; // Hier pure Anmeldung
-                worker.RunWorkerAsync(filePathsArray[i]); // löst do_work Event aus
+                worker.DoWork += worker_ConvertFile;
+                worker.RunWorkerAsync(filePathsArray[i]);
                 i++;
             }
         }
         private void ExecuteCancelCommand(object obj)
         {
-            // TODO funktioniert noch nicht so ganz, oder doch? => Multithreading...
             foreach (var worker in backgroundWorkers)
             {
                 worker.CancelAsync();
@@ -322,7 +304,7 @@ namespace FileConverter.ViewModel
                 e.Cancel = true;
                 return;
             }
-            string filePath = e.Argument as string; // TODO was genau ist diese as? Cast von LINQ?
+            string filePath = e.Argument as string;
             ConvertFileParallel(filePath);
             // worker.ProgressChanged += worker_ProgressChanged; mach ich noch in der Convert Methode
             worker.RunWorkerCompleted += worker_ConvertingCompleted;
@@ -345,62 +327,7 @@ namespace FileConverter.ViewModel
                 ComboBoxSelectedIndex = -1; // Um die Auswahl in der Kombobox für/ vor die nächste Auführung zu leeren
             }
         }
-        private void worker_LoadFile(object sender, DoWorkEventArgs e)
-        {
-            BackgroundWorker worker = sender as BackgroundWorker;
-            if (worker.CancellationPending == true)
-            {
-                e.Cancel = true;
-                return;
-            }
-            string file = e.Argument as string;
-            Files.FilePaths.Add(Path.GetFileName(file));
 
-
-            // FileNames.Add(Path.GetFileName(file));
-
-            //  TODO wohin damit, dass es funktioniert?
-            //var debug = (int)((Convert.ToDouble(amountAddedFiles - backgroundWorkers.Count) / amountAddedFiles) * 100);
-            worker.RunWorkerCompleted += worker_LoadingCompleted;
-        }
-
-        private void worker_LoadingCompleted(object sender, RunWorkerCompletedEventArgs e)
-        {
-            BackgroundWorker worker = sender as BackgroundWorker;
-            backgroundWorkers.Remove(worker); // Array und removen
-            worker.DoWork -= worker_LoadFile;
-
-            worker.RunWorkerCompleted -= worker_LoadingCompleted;
-
-            if (backgroundWorkers.Count() == 0) // Wait for all backgroundworker, then...
-            {
-                List<string> fileNames = GetNames(Files.FilePaths);
-                // TODO Hiermit werden Dispatcherprobleme umgangen
-                OFiles = new ObservableCollection<string>(fileNames);
-                SpinnerVisibility = "Hidden";
-                foreach (var file in fileNames)
-                {
-                    bool allSameFormat = false;
-                    allSameFormat = CheckIfSameFormats(fileNames.ToArray());
-                    if (!allSameFormat)
-                    {
-                        break;
-                    }
-
-                    // Zielformatwahl erscheinen lassen, soweit konvertierungsgeeignete Dateien ausgewählt
-                    if (!Formats.Contains(Path.GetExtension(file).ToLower().Trim('.')))
-                    {
-                        MessageBox.Show("Die Konvertierung des ausgewählten Dateiformats wird leider noch nicht unterstützt.", "Konvertierung nicht möglich");
-                        ZielformatVisibility = "Hidden";
-                        break;
-                    }
-                    // Da nach erster Ausführung auf "Visible"
-                    InfoText = "";
-                    ZielformatVisibility = "Visible";
-                    ButtonVisibility = "Visible";
-                }
-            }
-        }
 
         /// <summary>
         /// Gibt die Liste mit nur den Namen der Dateien zurück.
@@ -432,43 +359,34 @@ namespace FileConverter.ViewModel
         /// Gemeinsame Funktion für das hinzufügen von Dateien per Drag und Drop oder Browserauswahl
         /// </summary>
         /// <param name="filePaths"></param>
-        public void AddFiles(List<string> filePaths)
+        public void AddFiles(string[] filePaths)
         {
-            // NIE WIEDER LÖSCHEN!!!!!
-            Files.FilePaths = filePaths;  
-            // TODO HILFE!
-            //Application.Current.Dispatcher.Invoke((Action)(() => { Help(filePaths); }));
-
-            // Task.Factory.StartNew(() => { Help(filePaths); });
-
-            //thread = new Thread(new ThreadStart(() => Help(filePaths)));
-            //thread.Start();
-
-            // Muss passieren sonst bleiben die Backgroundworker null
-            Files.amountAddedFiles = Files.FilePaths.Count();
-            for (int j = 0; j < Files.amountAddedFiles; j++)
+            foreach (var file in filePaths)
             {
-                backgroundWorkers.Add(new BackgroundWorker());
+                if (Directory.Exists(file))
+                {
+                    SearchFiles(file);
+                }
             }
-
-            int i = 0;
-
-            foreach (var worker in backgroundWorkers) // Die ListView soll gefüllt werden, auch wenn die Konvertierung nicht stattfinden kann, damit der Benutzer seine Eingabe überprüfen kann
+            OFiles = new ObservableCollection<string>(GetNames(Files.FilePaths));
+            ZielformatVisibility = "Visible";
+            ButtonVisibility = "Visible";
+            InfoText = "Hidden";
+        }
+        public void SearchFiles(string path)
+        {
+            DirectoryInfo ParentDirectory = new DirectoryInfo(path);
+            // Searching Files in current Directory
+            foreach (FileInfo fileInfo in ParentDirectory.GetFiles())
             {
-                worker.WorkerSupportsCancellation = true;
-                worker.DoWork += worker_LoadFile;
-                worker.RunWorkerAsync(Files.FilePaths.ToArray()[i]); // löst do_work Event aus
-                i++;
+                Files.FilePaths.Add(fileInfo.FullName);
+            }
+            // Searching Files in included Directories
+            foreach (DirectoryInfo f in ParentDirectory.GetDirectories())
+            {
+                SearchFiles(f.FullName);
             }
         }
-        // TODO was ist damit????
-        //private void Help(List<string> filePaths)
-        //{
-        //    SpinnerVisibility = "Visible";
-        //    Files.amountAddedFiles = filePaths.Count;
-        //    //string[] filePathsArray = filePaths.ToArray();
-        //    this.Files.FileNames = filePaths;
-        //}
         #endregion
 
         #region auxiliary functions
