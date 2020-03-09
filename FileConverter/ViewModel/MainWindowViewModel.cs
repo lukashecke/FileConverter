@@ -154,7 +154,7 @@ namespace FileConverter.ViewModel
                 this.OnPropertyChanged("ZielformatVisibility");
             }
         }
-        
+
         private string infoText = $"Bitte wähle deine Dateien aus,\roder ziehe sie links rein.";
         public string InfoText
         {
@@ -303,7 +303,7 @@ namespace FileConverter.ViewModel
             {
                 worker.CancelAsync();
             }
-            InfoText = "Die Konvertierung wurde abgebrochen";
+            InfoText = "Die Konvertierung wurde abgebrochen.";
             CancelVisibility = "Hidden";
             NewVisibility = "Visible";
             ComboBoxSelectedIndex = -1; // Um die Auswahl in der Kombobox für/ vor die nächste Auführung zu leeren
@@ -336,7 +336,7 @@ namespace FileConverter.ViewModel
             if (backgroundWorkers.Count() == 0) // Wait for all backgroundworker, then...
             {
                 CancelVisibility = "Hidden";
-                InfoText = "Konvertierung abgeschlossen!";
+                InfoText = "Konvertierung abgeschlossen.";
                 NewVisibility = "Visible";
                 // TODO lsite soll hier geleert werden worker eventuell aucuh und nicht erst bei bzw vor einer neukonvertierung
                 ComboBoxSelectedIndex = -1; // Um die Auswahl in der Kombobox für/ vor die nächste Auführung zu leeren
@@ -366,15 +366,45 @@ namespace FileConverter.ViewModel
                 {
                     SearchFiles(file);
                 }
+                else
+                {
+                    Files.FilePaths.Add(file);
+                }
             }
             OFiles = new ObservableCollection<string>(GetNames(Files.FilePaths));
-            ZielformatVisibility = "Visible";
-            ButtonVisibility = "Visible";
-            InfoText = "Hidden";
-            NewVisibility = "Hidden";
-            ConvertingProgress = 0;
-            ConvertingFile = "";
+            if (CheckIfSameFormats(Files.FilePaths))
+            {
+                ZielformatVisibility = "Visible";
+                InfoText = "";
+                ButtonVisibility = "Visible";
+                NewVisibility = "Hidden";
+                ConvertingProgress = 0;
+                ConvertingFile = "";
+                if (!CheckIfSupportedFormats(Files.FilePaths))
+                {
+                    MessageBox.Show("Das gewählte Dateiformat wird leider noch nicht unterstützt.", "Nicht unterstützte Formate");
+                    ZielformatVisibility = "Hidden";
+                    InfoText = "Beachte bitte die Dokumentation.";
+                    ButtonVisibility = "Hidden";
+                    NewVisibility = "Visible";
+                    Files.FilePaths.Clear();
+                    ConvertingProgress = 0;
+                    ConvertingFile = "";
+                }
+            }
+            else
+            {
+                MessageBox.Show("Nicht alle deiner Dateien besitzen das selbe Format.", "Unterschiedliche Formate");
+                ZielformatVisibility = "Hidden";
+                InfoText = "Bitte überprüfe deine Dateien.";
+                ButtonVisibility = "Hidden";
+                NewVisibility = "Visible";
+                Files.FilePaths.Clear();
+                ConvertingProgress = 0;
+                ConvertingFile = "";
+            }
         }
+
         public void SearchFiles(string path)
         {
             DirectoryInfo ParentDirectory = new DirectoryInfo(path);
@@ -415,7 +445,7 @@ namespace FileConverter.ViewModel
         /// </summary>
         /// <param name="filePaths"></param>
         /// <returns></returns>
-        private bool CheckIfSameFormats(string[] filePaths) // TODO einzelne Files hier ab und zu noch null
+        private bool CheckIfSameFormats(List<string> filePaths) // TODO einzelne Files hier ab und zu noch null
         {
             foreach (var file in filePaths)
             {
@@ -425,12 +455,26 @@ namespace FileConverter.ViewModel
                 string firstFile = Files.FilePaths.First();
                 if (!Path.GetExtension(file).ToLower().Trim('.').Equals(Path.GetExtension(firstFile).ToLower().Trim('.'))) // Prüfen, ob alle Dateien das selbe Format besitzen
                 {
-                    MessageBox.Show("Nicht alle deiner Dateien besitzen das selbe Format.", "Unterschiedliche Formate");
-                    ZielformatVisibility = "Hidden";
                     return false;
                 }
             }
             return true;
+        }
+        private bool CheckIfSupportedFormats(List<string> filePaths)
+        {
+            // TODO Zur Laufzeit werden irgendwo noch Dateien blockiert!
+            // TODO Erklärung?
+            // Die erste Datei MUSS UMBEDINGT separat in eine Variable abgespeichert werden, damit diese wieder freigegeben wird. Wird im if durch FileNames.First() abgefragt, bleibt die erste datei zur Laufszeit des Programms gesperrt.
+            string firstFile = Files.FilePaths.First();
+
+            if (Formats.Contains(Path.GetExtension(firstFile).ToLower().Trim('.')))
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
         #endregion
 
