@@ -136,23 +136,7 @@ namespace FileConverter.ViewModel
                 this.OnPropertyChanged("ZielformatVisibility");
             }
         }
-        private string spinnerVisibility = "Hidden";
-        public string SpinnerVisibility
-        {
-            get
-            {
-                if (this.spinnerVisibility == null)
-                {
-                    this.spinnerVisibility = "Hidden";
-                }
-                return this.spinnerVisibility;
-            }
-            set
-            {
-                this.spinnerVisibility = value;
-                this.OnPropertyChanged("SpinnerVisibility");
-            }
-        }
+        
         private string infoText = $"Bitte wähle deine Dateien aus,\roder ziehe sie links rein.";
         public string InfoText
         {
@@ -295,7 +279,7 @@ namespace FileConverter.ViewModel
         }
         #endregion
 
-        #region event
+        #region events
         private void worker_ConvertFile(object sender, DoWorkEventArgs e)
         {
             BackgroundWorker worker = sender as BackgroundWorker; // Get the BackgroundWorker that raised this event.
@@ -306,7 +290,6 @@ namespace FileConverter.ViewModel
             }
             string filePath = e.Argument as string;
             ConvertFileParallel(filePath);
-            // worker.ProgressChanged += worker_ProgressChanged; mach ich noch in der Convert Methode
             worker.RunWorkerCompleted += worker_ConvertingCompleted;
             Files.FilePaths.Remove(filePath);
         }
@@ -327,22 +310,6 @@ namespace FileConverter.ViewModel
                 ComboBoxSelectedIndex = -1; // Um die Auswahl in der Kombobox für/ vor die nächste Auführung zu leeren
             }
         }
-
-
-        /// <summary>
-        /// Gibt die Liste mit nur den Namen der Dateien zurück.
-        /// </summary>
-        /// <param name="fileNames"></param>
-        /// <returns></returns>
-        private List<string> GetNames(List<string> fileNames)
-        {
-            List<string> temp = new List<string>();
-            foreach (var file in fileNames)
-            {
-                temp.Add(Path.GetFileName(file));
-            }
-            return temp;
-        }
         #endregion
 
         #region functions
@@ -352,7 +319,7 @@ namespace FileConverter.ViewModel
             Converter converter = new Converter(file, Formats.Current, savingPath);
             converter.Convert(); // TODO Ändern!
             Files.amountConvertedFiles++;
-            //  ConvertingProgress muss Zahl zwischen 0 und 100 zurückgeben
+            // ConvertingProgress muss Zahl zwischen 0 und 100 zurückgeben
             ConvertingProgress = (int)((Convert.ToDouble(Files.amountConvertedFiles) / Files.amountOfFiles) * 100);
         }
         /// <summary>
@@ -390,6 +357,20 @@ namespace FileConverter.ViewModel
         #endregion
 
         #region auxiliary functions
+        /// <summary>
+        /// Gibt die Liste mit nur den Namen der Dateien zurück.
+        /// </summary>
+        /// <param name="fileNames"></param>
+        /// <returns></returns>
+        private List<string> GetNames(List<string> fileNames)
+        {
+            List<string> temp = new List<string>();
+            foreach (var file in fileNames)
+            {
+                temp.Add(Path.GetFileName(file));
+            }
+            return temp;
+        }
         private void CreateSavingDirectory()
         {
             Directory.CreateDirectory(savingPath);
