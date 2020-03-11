@@ -117,5 +117,18 @@
   <ItemGroup>
     <Resource Include="Images\hochladen.png" />
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\upload.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\konvertieren.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\convert.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\cancel.png" />
+    <Resource Include="Images\checked.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

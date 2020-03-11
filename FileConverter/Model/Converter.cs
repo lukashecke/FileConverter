@@ -13,7 +13,6 @@ namespace FileConverter.Model
     /// </summary>
     public class Converter
     { 
-        // TODO die Umstellung auf den Delegaten kostet etwas Laufzeit :/
         delegate void ConvertionHandler();
         private ConvertionHandler convertionHandler;
         private string filePath;

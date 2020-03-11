@@ -31,6 +31,7 @@ namespace FileConverter.ViewModel
         public ICommand ConvertCommand { get; set; }
         public ICommand CancelCommand { get; set; }
         public ICommand NewCommand { get; set; }
+        public ICommand CloseCommand { get; set; }
         #endregion
 
         #region entities
@@ -225,6 +226,7 @@ namespace FileConverter.ViewModel
             this.ConvertCommand = new RelayCommand(ExecuteConvertCommand, CanExecuteConvert);
             this.CancelCommand = new RelayCommand(ExecuteCancelCommand, CanExecuteCancel);
             this.NewCommand = new RelayCommand(ExecutNewCommand, CanExecuteNew);
+            this.CloseCommand = new RelayCommand(ExecuteCloseCommand, CanExecuteClose);
             // Hier werden bislang die Möglichen Konvertierungsformate festgehalten
             formats.Add("png");
             formats.Add("jpg");
@@ -235,6 +237,10 @@ namespace FileConverter.ViewModel
         #endregion
 
         #region commands
+        private void ExecuteCloseCommand(object obj)
+        {
+            Application.Current.MainWindow.Close();
+        }
         private void ExecutNewCommand(object obj)
         {
             ButtonVisibility = "Hidden";
@@ -327,7 +333,6 @@ namespace FileConverter.ViewModel
         {
             BackgroundWorker worker = sender as BackgroundWorker;
             backgroundWorkers.Remove(worker); // Array und removen
-            // TODO disposen? -> Anschauen! 
             worker.DoWork -= worker_ConvertFile;
             worker.RunWorkerCompleted -= worker_ConvertingCompleted;
 
@@ -486,6 +491,10 @@ namespace FileConverter.ViewModel
             return true;
         }
         private bool CanExecuteNew(object arg)
+        {
+            return true;
+        }
+        private bool CanExecuteClose(object arg)
         {
             return true;
         }

@@ -5,22 +5,106 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:FileConverter"
         mc:Ignorable="d"
-        Title="File Converter" 
+        Title="File Converter"
         Height="350" 
         Width="450"
-        Background="LightGray"
         ResizeMode="NoResize"
-        WindowStartupLocation="CenterScreen">
+        WindowStartupLocation="CenterScreen"
+        WindowStyle="None">
     <Window.Resources>
-        <!--StaticResources-->
+        <SolidColorBrush x:Key="Black" Color="#1c1c1c" />
+        <SolidColorBrush x:Key="Dark" Color="#2d2d2d" />
+        <SolidColorBrush x:Key="RoyalBlue" Color="#34638a" />
+        <SolidColorBrush x:Key="MidnightBlue" Color="#233947" />
+        <SolidColorBrush x:Key="White" Color="#ffffff" />
+        <!--  BasedOn="{StaticResource BaseButtonStyle}"-->
+        <Style x:Key="MyButtonStyle" TargetType="{x:Type Button}">
+            <!--<Setter Property="Background" Value="#FF34789C"/>
+            <Setter Property="Foreground" Value="#FFFFFF"/>-->
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Button}">
+                        <Border x:Name="Border" Background="{TemplateBinding Background}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#FF007ACC" TargetName="Border" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+
+        </Style>
     </Window.Resources>
-    <Grid Name="Window">
+    <Grid Name="Window" Background="{StaticResource Dark}">
         <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
             <RowDefinition Height="11*"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
+        <DockPanel Grid.Row="0" Background="{StaticResource MidnightBlue}">
+            <Grid Height="27">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width ="*"/>
+                    <ColumnDefinition Width ="*"/>
+                </Grid.ColumnDefinitions>
+                <Button Foreground="{StaticResource MidnightBlue}"
+                        Command="{Binding CloseCommand}"
+                        Grid.Column="1"
+                        HorizontalAlignment="Right"
+                        BorderThickness="0"
+                        HorizontalContentAlignment="Center"
+                        VerticalContentAlignment="Center"
+                        Margin="5"
+                        Height="15"
+                        Width="15"
+                        Background="Transparent">
+                    <Button.Style>
+                        <Style TargetType="Button">
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border Name="border" >
+                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="border" Property="BorderBrush" Value="Black" />
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </Button.Style>
+                    <Image>
+                        <Image.Style>
+                            <Style TargetType="{x:Type Image}">
+                                <Setter Property="Source" Value="/Images/Testbild.jpg"/>
+                                <Style.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Source" Value="/Images/cancel.png"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Image.Style>
+                    </Image>
+                </Button>
+                <Grid Grid.Column="0" >
+                    <StackPanel Orientation="Horizontal">
+                        <Image  Source="/Images/konvertieren.png" 
+                                HorizontalAlignment="Left"
+                                Margin="3,0,3,0" Height="27"/>
+                        <Label Content="FileConverter" Foreground="{StaticResource White}"/>
+                    </StackPanel>
+                </Grid>
+            </Grid>
+        </DockPanel>
         <Grid Name="Content"
-              Grid.Row="0">
+              Grid.Row="1">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width ="*"/>
                 <ColumnDefinition Width ="*"/>
@@ -30,7 +114,7 @@
                     <RowDefinition Height="4*"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
-                <Grid>
+                <Grid >
                     <ListView ItemsSource="{Binding OFiles}"
                               Drop="ListBox_Drop"
                               AllowDrop="True"
@@ -38,7 +122,8 @@
                               Grid.Row="0"
                               HorizontalAlignment="Stretch"
                               VerticalAlignment="Stretch"
-                              Margin="10,10,10,0">
+                              Margin="10,10,10,0"
+                              Background="{StaticResource RoyalBlue}">
                         <ListView.Style>
                             <Style TargetType="ListView">
                                 <Style.Triggers>
@@ -58,6 +143,8 @@
                         </ListView.Resources>
                         <ListView.ItemContainerStyle>
                             <Style TargetType="ListViewItem">
+                                <!--<Setter Property="Background" Value="{StaticResource Color3}"/>
+                                <Setter Property="Foreground" Value="{StaticResource Color1}"/>-->
                                 <Setter Property="IsHitTestVisible" Value="false"/>
                             </Style>
                         </ListView.ItemContainerStyle>
@@ -65,7 +152,8 @@
                 </Grid>
                 <Button Content="Dateien suchen" 
                         Command="{Binding BrowseCommand}"
-                        Background="White" 
+                        Style="{StaticResource MyButtonStyle}"
+                        Background="{StaticResource RoyalBlue}"
                         HorizontalContentAlignment="Center"
                         Grid.Row="1"
                         Height="30"
@@ -99,16 +187,26 @@
                 <ComboBox ItemsSource="{Binding Formats}"
                           SelectedItem="{Binding Formats.Current, Mode=TwoWay}"
                           SelectedIndex="{Binding ComboBoxSelectedIndex}"
+                          Background="{StaticResource RoyalBlue}"
                           Visibility="{Binding ZielformatVisibility}"
                           Grid.Row="2"
                           Height="30"
                           Width="100"  
                           HorizontalAlignment="Center" 
                           VerticalAlignment="Top">
+                    <ComboBox.ItemContainerStyle>
+                        <Style TargetType="ComboBoxItem">
+                            <Setter Property="Background" Value="{StaticResource RoyalBlue}"/>
+                            <Setter Property="Foreground" Value="{StaticResource MidnightBlue}"/>
+                            <Setter Property="BorderThickness" Value="0"/>
+                        </Style>
+                    </ComboBox.ItemContainerStyle>
                 </ComboBox>
                 <Button Content="Konvertieren" 
                         Command="{Binding ConvertCommand}"
                         Visibility="{Binding ButtonVisibility}"
+                        Style="{StaticResource MyButtonStyle}"
+                        Background="{StaticResource White}"
                         Grid.Row="3"
                         Height="30"
                         Width="100" 
@@ -118,6 +216,8 @@
                 <Button Content="Abbrechen" 
                         Command="{Binding CancelCommand}"
                         Visibility="{Binding CancelVisibility}"
+                        Style="{StaticResource MyButtonStyle}"
+                        Background="{StaticResource White}"
                         Grid.Row="3"
                         Height="30"
                         Width="100" 
@@ -127,40 +227,76 @@
                 <Button Content="Neue Konvertierung" 
                         Command="{Binding NewCommand}"
                         Visibility="{Binding NewVisibility}"
+                        Style="{StaticResource MyButtonStyle}"
+                        Background="{StaticResource White}"
                         Grid.Row="3"
                         Height="30"
                         Width="100" 
                         HorizontalAlignment="Center" 
                         VerticalAlignment="Bottom">
                 </Button>
-                <Label Content="© 2020 Lukas Hecke"
+                <!--<Label Content="© 2020 Lukas Hecke"
                        FontSize="8"
+                       Grid.Row="5"
+                       HorizontalAlignment="Right" 
+                       VerticalAlignment="Bottom">
+                </Label>-->
+                <Label Content="{Binding ConvertingProgress}"
+                       ContentStringFormat="{}{0} %"
+                       Foreground="White"
+                       FontSize="16"
                        Grid.Row="5"
                        HorizontalAlignment="Right" 
                        VerticalAlignment="Bottom">
                 </Label>
             </Grid>
         </Grid>
-        <DockPanel Name="Infobar"
-                   Grid.Row="1">
-            <StatusBar DockPanel.Dock="Bottom">
+        <DockPanel Name="Infobar" 
+                   Grid.Row="2">
+            <StatusBar DockPanel.Dock="Bottom" Background="{StaticResource RoyalBlue}">
                 <StatusBar.ItemsPanel>
                     <ItemsPanelTemplate>
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
                                 <ColumnDefinition Width="100" />
                             </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
                         </Grid>
                     </ItemsPanelTemplate>
                 </StatusBar.ItemsPanel>
-                <StatusBarItem Grid.Column="0" Grid.ColumnSpan="2">
-                    <TextBlock Text="{Binding ConvertingFile}"/>
+
+                <Separator Foreground="Black" Grid.ColumnSpan="2"/>
+
+                <StatusBarItem Grid.Column="0" Grid.Row="1">
+                    <TextBlock Text="{Binding ConvertingFile}"
+                               Foreground="{StaticResource MidnightBlue}"/>
                 </StatusBarItem>
-                <Separator Grid.Column="1" />
-                <StatusBarItem Grid.Column="3">
-                    <ProgressBar Value="{Binding ConvertingProgress}" Width="90" Height="16" />
+                
+                <StatusBarItem Grid.Column="1" Grid.Row="1">
+                    <ProgressBar Background="{DynamicResource MidnightBlue}"
+                                 Value="{Binding ConvertingProgress}" 
+                                 Width="90" 
+                                 Height="16" Foreground="White">
+                        <ProgressBar.Style>
+                            <Style TargetType="ProgressBar">
+                                <Style.Triggers>
+                                    <Trigger Property="Value" Value="100">
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="ProgressBar">
+                                                    <Image Source="/Images/checked.png"/>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ProgressBar.Style>
+                    </ProgressBar>
                 </StatusBarItem>
             </StatusBar>
         </DockPanel>
