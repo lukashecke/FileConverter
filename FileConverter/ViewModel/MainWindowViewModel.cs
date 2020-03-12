@@ -18,7 +18,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 
 namespace FileConverter.ViewModel
-{
+{    
     public class MainWindowViewModel : ViewModelBase
     {
         #region fields
@@ -211,6 +211,11 @@ namespace FileConverter.ViewModel
             }
             set
             {
+                if (value!=-1)
+                {
+                    ButtonVisibility = "Visible";
+                    this.OnPropertyChanged(" ButtonVisibility");
+                }
                 this.comboBoxSelectedIndex = value;
                 this.OnPropertyChanged("ComboBoxSelectedIndex");
             }
@@ -336,13 +341,17 @@ namespace FileConverter.ViewModel
             worker.DoWork -= worker_ConvertFile;
             worker.RunWorkerCompleted -= worker_ConvertingCompleted;
 
-            if (backgroundWorkers.Count() == 0) // Wait for all backgroundworker, then...
+            if (ConvertingProgress==100)
             {
                 CancelVisibility = "Hidden";
                 InfoText = "Konvertierung abgeschlossen.";
                 NewVisibility = "Visible";
                 ComboBoxSelectedIndex = -1; // Um die Auswahl in der Kombobox für/ vor die nächste Auführung zu leeren
             }
+            Files.amountConvertedFiles++;
+
+            // TODO ConvertingProgress bleibt bei vielen Dateien bei 99 stehen?
+            ConvertingProgress = (int)((Convert.ToDouble(Files.amountConvertedFiles) / Files.amountOfFiles) * 100); // ConvertingProgress muss Zahl zwischen 0 und 100 zurückgeben
         }
         #endregion
 
@@ -352,9 +361,9 @@ namespace FileConverter.ViewModel
             ConvertingFile = file;
             Converter converter = new Converter(file, Formats.Current, savingPath);
             converter.Convert();
-            Files.amountConvertedFiles++;
-            // ConvertingProgress muss Zahl zwischen 0 und 100 zurückgeben
-            ConvertingProgress = (int)((Convert.ToDouble(Files.amountConvertedFiles) / Files.amountOfFiles) * 100);
+
+            // TODO Frage: Wieso führt die Berechnung des ConvertProgress an dieser Stelle zu fehlern -> 99% bei vielen Dateien
+            // ConvertingProgress = (int)((Convert.ToDouble(Files.amountConvertedFiles) / Files.amountOfFiles) * 100); // ConvertingProgress muss Zahl zwischen 0 und 100 zurückgeben
         }
         /// <summary>
         /// Gemeinsame Funktion für das hinzufügen von Dateien per Drag und Drop oder Browserauswahl
@@ -378,7 +387,6 @@ namespace FileConverter.ViewModel
             {
                 ZielformatVisibility = "Visible";
                 InfoText = "";
-                ButtonVisibility = "Visible";
                 NewVisibility = "Hidden";
                 ConvertingProgress = 0;
                 ConvertingFile = "";
@@ -480,11 +488,7 @@ namespace FileConverter.ViewModel
         }
         private bool CanExecuteConvert(object arg)
         {
-            if (Formats.Current != null)
-            {
-                return true;
-            }
-            return false;
+            return true;
         }
         public bool CanExecuteBrowse(object param)
         {

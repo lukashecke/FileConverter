@@ -12,40 +12,79 @@
         WindowStartupLocation="CenterScreen"
         WindowStyle="None">
     <Window.Resources>
+        <!--Code Demon Electronics Color Palette-->
         <SolidColorBrush x:Key="Black" Color="#1c1c1c" />
         <SolidColorBrush x:Key="Dark" Color="#2d2d2d" />
         <SolidColorBrush x:Key="RoyalBlue" Color="#34638a" />
         <SolidColorBrush x:Key="MidnightBlue" Color="#233947" />
         <SolidColorBrush x:Key="White" Color="#ffffff" />
+        <!--Shades of Teal Color Palette-->
+        <SolidColorBrush x:Key="SOT1" Color="#b2d8d8" />
+        <SolidColorBrush x:Key="SOT2" Color="#66b2b2" />
+        <SolidColorBrush x:Key="SOT3" Color="#008080" />
+        <SolidColorBrush x:Key="SOT4" Color="#006666" />
+        <SolidColorBrush x:Key="SOT5" Color="#004c4c" />
         <!--  BasedOn="{StaticResource BaseButtonStyle}"-->
         <Style x:Key="MyButtonStyle" TargetType="{x:Type Button}">
-            <!--<Setter Property="Background" Value="#FF34789C"/>
-            <Setter Property="Foreground" Value="#FFFFFF"/>-->
-            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Background" Value="{StaticResource SOT1}"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="{x:Type Button}">
-                        <Border x:Name="Border" Background="{TemplateBinding Background}">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        <Border Background="{TemplateBinding Background}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="{StaticResource SOT2}"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!--<Style x:Key="MyButtonStyle" TargetType="{x:Type Button}">
+            
+            -->
+        <!--<Setter Property="Background" Value="#FF34789C"/>
+            <Setter Property="Foreground" Value="#FFFFFF"/>-->
+        <!--
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Template">
+               
+                    <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Button}">
+                        <Border Background="{TemplateBinding Background}" BorderBrush="Black" BorderThickness="1">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        -->
+        <!--<Border x:Name="Border" Background="{TemplateBinding Background}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>-->
+        <!--
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Background" Value="#FF007ACC" TargetName="Border" />
+                                <Setter Property="Background" Value="#FF007ACC"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
-
-        </Style>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="Red"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>-->
     </Window.Resources>
-    <Grid Name="Window" Background="{StaticResource Dark}">
+    
+    <Grid Name="Window" Background="{StaticResource White}">
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
             <RowDefinition Height="11*"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <DockPanel Grid.Row="0" Background="{StaticResource MidnightBlue}">
+        <DockPanel Grid.Row="0" Background="{StaticResource SOT3}">
             <Grid Height="27">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width ="*"/>
@@ -123,9 +162,11 @@
                               HorizontalAlignment="Stretch"
                               VerticalAlignment="Stretch"
                               Margin="10,10,10,0"
-                              Background="{StaticResource RoyalBlue}">
+                              Background="{StaticResource SOT1}"
+                              BorderThickness="0">
                         <ListView.Style>
                             <Style TargetType="ListView">
+                                <!--<Setter Property="ScrollViewer.Background" Value="White"/>-->
                                 <Style.Triggers>
                                     <Trigger Property="HasItems" Value="False">
                                         <Setter Property="Template">
@@ -153,7 +194,6 @@
                 <Button Content="Dateien suchen" 
                         Command="{Binding BrowseCommand}"
                         Style="{StaticResource MyButtonStyle}"
-                        Background="{StaticResource RoyalBlue}"
                         HorizontalContentAlignment="Center"
                         Grid.Row="1"
                         Height="30"
@@ -187,7 +227,6 @@
                 <ComboBox ItemsSource="{Binding Formats}"
                           SelectedItem="{Binding Formats.Current, Mode=TwoWay}"
                           SelectedIndex="{Binding ComboBoxSelectedIndex}"
-                          Background="{StaticResource RoyalBlue}"
                           Visibility="{Binding ZielformatVisibility}"
                           Grid.Row="2"
                           Height="30"
@@ -196,8 +235,7 @@
                           VerticalAlignment="Top">
                     <ComboBox.ItemContainerStyle>
                         <Style TargetType="ComboBoxItem">
-                            <Setter Property="Background" Value="{StaticResource RoyalBlue}"/>
-                            <Setter Property="Foreground" Value="{StaticResource MidnightBlue}"/>
+                            <Setter Property="Background" Value="{StaticResource SOT1}"/>
                             <Setter Property="BorderThickness" Value="0"/>
                         </Style>
                     </ComboBox.ItemContainerStyle>
@@ -206,7 +244,6 @@
                         Command="{Binding ConvertCommand}"
                         Visibility="{Binding ButtonVisibility}"
                         Style="{StaticResource MyButtonStyle}"
-                        Background="{StaticResource White}"
                         Grid.Row="3"
                         Height="30"
                         Width="100" 
@@ -217,7 +254,6 @@
                         Command="{Binding CancelCommand}"
                         Visibility="{Binding CancelVisibility}"
                         Style="{StaticResource MyButtonStyle}"
-                        Background="{StaticResource White}"
                         Grid.Row="3"
                         Height="30"
                         Width="100" 
@@ -228,7 +264,6 @@
                         Command="{Binding NewCommand}"
                         Visibility="{Binding NewVisibility}"
                         Style="{StaticResource MyButtonStyle}"
-                        Background="{StaticResource White}"
                         Grid.Row="3"
                         Height="30"
                         Width="100" 
@@ -241,19 +276,12 @@
                        HorizontalAlignment="Right" 
                        VerticalAlignment="Bottom">
                 </Label>-->
-                <Label Content="{Binding ConvertingProgress}"
-                       ContentStringFormat="{}{0} %"
-                       Foreground="White"
-                       FontSize="16"
-                       Grid.Row="5"
-                       HorizontalAlignment="Right" 
-                       VerticalAlignment="Bottom">
-                </Label>
+
             </Grid>
         </Grid>
         <DockPanel Name="Infobar" 
                    Grid.Row="2">
-            <StatusBar DockPanel.Dock="Bottom" Background="{StaticResource RoyalBlue}">
+            <StatusBar DockPanel.Dock="Bottom" Background="{StaticResource SOT3}">
                 <StatusBar.ItemsPanel>
                     <ItemsPanelTemplate>
                         <Grid>
@@ -269,18 +297,18 @@
                     </ItemsPanelTemplate>
                 </StatusBar.ItemsPanel>
 
-                <Separator Foreground="Black" Grid.ColumnSpan="2"/>
+                <!--<Separator Foreground="Black" Grid.ColumnSpan="2"/>-->
 
                 <StatusBarItem Grid.Column="0" Grid.Row="1">
                     <TextBlock Text="{Binding ConvertingFile}"
-                               Foreground="{StaticResource MidnightBlue}"/>
+                               Foreground="{StaticResource White}"/>
                 </StatusBarItem>
-                
+
                 <StatusBarItem Grid.Column="1" Grid.Row="1">
-                    <ProgressBar Background="{DynamicResource MidnightBlue}"
+                    <ProgressBar Background="{DynamicResource SOT1}"
                                  Value="{Binding ConvertingProgress}" 
                                  Width="90" 
-                                 Height="16" Foreground="White">
+                                 Height="16"  Foreground="{StaticResource White}">
                         <ProgressBar.Style>
                             <Style TargetType="ProgressBar">
                                 <Style.Triggers>
@@ -300,5 +328,26 @@
                 </StatusBarItem>
             </StatusBar>
         </DockPanel>
+        <Label Content="{Binding ConvertingProgress}"
+                       ContentStringFormat="{}{0} %"
+                       Background="Transparent"
+                       Foreground="Black"
+                       FontSize="9"
+                       Grid.Row="2" Margin="355,0,10,0"
+               HorizontalContentAlignment="Center">
+            <Label.Style>
+                <Style TargetType="{x:Type Label}">
+                    <Setter Property="Content" Value="{Binding ConvertingProgress}" />
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding ConvertingProgress}" Value="100">
+                            <Setter Property="Visibility" Value="Hidden"/>
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding ConvertingProgress}" Value="0">
+                            <Setter Property="Visibility" Value="Hidden"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Label.Style>
+        </Label>
     </Grid>
 </Window>
