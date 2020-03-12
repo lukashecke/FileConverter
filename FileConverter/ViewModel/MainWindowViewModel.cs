@@ -341,6 +341,9 @@ namespace FileConverter.ViewModel
             worker.DoWork -= worker_ConvertFile;
             worker.RunWorkerCompleted -= worker_ConvertingCompleted;
 
+            Files.amountConvertedFiles++;
+            ConvertingProgress = (int)((Convert.ToDouble(Files.amountConvertedFiles) / Files.amountOfFiles) * 100); // ConvertingProgress muss Zahl zwischen 0 und 100 zurückgeben
+
             if (ConvertingProgress==100)
             {
                 CancelVisibility = "Hidden";
@@ -348,10 +351,6 @@ namespace FileConverter.ViewModel
                 NewVisibility = "Visible";
                 ComboBoxSelectedIndex = -1; // Um die Auswahl in der Kombobox für/ vor die nächste Auführung zu leeren
             }
-            Files.amountConvertedFiles++;
-
-            // TODO ConvertingProgress bleibt bei vielen Dateien bei 99 stehen?
-            ConvertingProgress = (int)((Convert.ToDouble(Files.amountConvertedFiles) / Files.amountOfFiles) * 100); // ConvertingProgress muss Zahl zwischen 0 und 100 zurückgeben
         }
         #endregion
 
