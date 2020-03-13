@@ -28,7 +28,7 @@
         <SolidColorBrush x:Key="PandaBlue" Color="#FF00BCDF" />
         <!--  BasedOn="{StaticResource BaseButtonStyle}"-->
         <Style x:Key="MyButtonStyle" TargetType="{x:Type Button}">
-            <Setter Property="Background" Value="{StaticResource SOT1}"/>
+            <Setter Property="Background" Value="{StaticResource SOT2}"/>
             <Setter Property="Foreground" Value="{StaticResource Dark}"/>
             <Setter Property="Width" Value="110"/>
             <Setter Property="Height" Value="30"/>
@@ -43,7 +43,7 @@
             </Setter>
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="{StaticResource SOT2}"/>
+                    <Setter Property="Background" Value="{StaticResource SOT3}"/>
                 </Trigger>
             </Style.Triggers>
         </Style>
@@ -89,8 +89,8 @@
             <RowDefinition Height="11*"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <DockPanel Grid.Row="0" Background="{StaticResource SOT3}">
-            <Grid Height="27">
+        <DockPanel Grid.Row="0" Background="{StaticResource SOT4}" MouseLeftButtonDown="Grid_MouseLeftButtonDown">
+            <Grid Height="27" VerticalAlignment="Top">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width ="*"/>
                     <ColumnDefinition Width ="*"/>
@@ -281,7 +281,7 @@
         </Grid>
         <DockPanel Name="Infobar" 
                    Grid.Row="2">
-            <StatusBar DockPanel.Dock="Bottom" Background="{StaticResource SOT3}">
+            <StatusBar DockPanel.Dock="Bottom" Background="{StaticResource SOT4}">
                 <StatusBar.ItemsPanel>
                     <ItemsPanelTemplate>
                         <Grid>
