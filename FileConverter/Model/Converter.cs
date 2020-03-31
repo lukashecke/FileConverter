@@ -12,8 +12,8 @@ namespace FileConverter.Model
     /// Konvertiert und speichert die Datei.
     /// </summary>
     public class Converter
-    { 
-        delegate void ConvertionHandler();
+    {
+        delegate void ConvertionHandler(int counter);
         private ConvertionHandler convertionHandler;
         private string filePath;
         private string format;
@@ -51,7 +51,7 @@ namespace FileConverter.Model
         /// </summary>
         /// <param name="filePath"></param>
         /// <param name="format"></param>
-        public void Convert()
+        public void Convert(int counter=1)
         {
             /* Microsoft Dokumentation
              * Windows Presentation Foundation (WPF) systemeigene Unterstützung für die Komprimierung und die decokomprimierung von Images von 
@@ -62,86 +62,171 @@ namespace FileConverter.Model
              * Tagged Image File Format (TIFF).
              */
 
-            convertionHandler();
+            convertionHandler(counter);
         }
-        private void ConvertToJpg()
+        private void ConvertToJpg(int counter=1)
         {
             string fileName = Path.GetFileNameWithoutExtension(filePath);
-            string fullName = Path.Combine(savingPath, fileName + "." + format.ToLower());
-            BitmapImage bi = new BitmapImage();
+            string fullName;
+            if (counter == 0)
+            {
+                fullName = Path.Combine(savingPath, fileName + "." + format.ToLower());
+            }
+            else
+            {
+                fullName = Path.Combine(savingPath, fileName + "(" + counter + ")." + format.ToLower());
+
+            }
             JpegBitmapEncoder jpegBitmapEncoder = new JpegBitmapEncoder();
+            BitmapImage bi = new BitmapImage();
             // BitmapImage.UriSource must be in a BeginInit/EndInit block.
             bi.BeginInit();
             bi.UriSource = new Uri(filePath, UriKind.RelativeOrAbsolute);
             bi.EndInit();
-            using (var fileStream = new FileStream(fullName, FileMode.Create))
+            try
             {
-                jpegBitmapEncoder.Frames.Add(BitmapFrame.Create(bi));
-                jpegBitmapEncoder.Save(fileStream);
+                using (var fileStream = new FileStream(fullName, FileMode.Create))
+                {
+                    jpegBitmapEncoder.Frames.Add(BitmapFrame.Create(bi));
+                    jpegBitmapEncoder.Save(fileStream);
+
+                }
+            }
+            catch (IOException ex) // Wird geworfen, wenn Datei aus anderem Format, jedoch mit selbem Dateinamen gleichzeitig von einem anderen Thread konvertiert bzw. erzeugt wird
+            {
+                ConvertToTiff(counter++);
             }
         }
-        private void ConvertToPng()
+        private void ConvertToPng(int counter=1)
         {
             string fileName = Path.GetFileNameWithoutExtension(filePath);
-            string fullName = Path.Combine(savingPath, fileName + "." + format.ToLower());
-            BitmapImage bi = new BitmapImage();
+            string fullName;
+            if (counter == 0)
+            {
+                fullName = Path.Combine(savingPath, fileName + "." + format.ToLower());
+            }
+            else
+            {
+                fullName = Path.Combine(savingPath, fileName + "(" + counter + ")." + format.ToLower());
+
+            }
             PngBitmapEncoder pngBitmapEncoder = new PngBitmapEncoder();
+            BitmapImage bi = new BitmapImage();
             // BitmapImage.UriSource must be in a BeginInit/EndInit block.
             bi.BeginInit();
             bi.UriSource = new Uri(filePath, UriKind.RelativeOrAbsolute);
             bi.EndInit();
-            using (var fileStream = new FileStream(fullName, FileMode.Create))
+            try
             {
-                pngBitmapEncoder.Frames.Add(BitmapFrame.Create(bi));
-                pngBitmapEncoder.Save(fileStream);
+                using (var fileStream = new FileStream(fullName, FileMode.Create))
+                {
+                    pngBitmapEncoder.Frames.Add(BitmapFrame.Create(bi));
+                    pngBitmapEncoder.Save(fileStream);
+
+                }
+            }
+            catch (IOException ex) // Wird geworfen, wenn Datei aus anderem Format, jedoch mit selbem Dateinamen gleichzeitig von einem anderen Thread konvertiert bzw. erzeugt wird
+            {
+                ConvertToTiff(counter++);
             }
         }
-        private void ConvertToBmp()
+        private void ConvertToBmp(int counter=1)
         {
             string fileName = Path.GetFileNameWithoutExtension(filePath);
-            string fullName = Path.Combine(savingPath, fileName + "." + format.ToLower());
-            BitmapImage bi = new BitmapImage();
+            string fullName;
+            if (counter == 0)
+            {
+                fullName = Path.Combine(savingPath, fileName + "." + format.ToLower());
+            }
+            else
+            {
+                fullName = Path.Combine(savingPath, fileName + "(" + counter + ")." + format.ToLower());
+
+            }
             BmpBitmapEncoder bmpBitmapEncoder = new BmpBitmapEncoder();
-            // BitmapImage.UriSource must be in a BeginInit/EndInit block.
-            bi.BeginInit();
-            bi.UriSource = new Uri(filePath, UriKind.RelativeOrAbsolute);
-            bi.EndInit();
-            using (var fileStream = new FileStream(fullName, FileMode.Create))
-            {
-                bmpBitmapEncoder.Frames.Add(BitmapFrame.Create(bi));
-                bmpBitmapEncoder.Save(fileStream);
-            }
-        }
-        private void ConvertToGif()
-        {
-            string fileName = Path.GetFileNameWithoutExtension(filePath);
-            string fullName = Path.Combine(savingPath, fileName + "." + format.ToLower());
             BitmapImage bi = new BitmapImage();
-            GifBitmapEncoder gifBitmapEncoder = new GifBitmapEncoder();
             // BitmapImage.UriSource must be in a BeginInit/EndInit block.
             bi.BeginInit();
             bi.UriSource = new Uri(filePath, UriKind.RelativeOrAbsolute);
             bi.EndInit();
-            using (var fileStream = new FileStream(fullName, FileMode.Create))
+            try
             {
-                gifBitmapEncoder.Frames.Add(BitmapFrame.Create(bi));
-                gifBitmapEncoder.Save(fileStream);
+                using (var fileStream = new FileStream(fullName, FileMode.Create))
+                {
+                    bmpBitmapEncoder.Frames.Add(BitmapFrame.Create(bi));
+                    bmpBitmapEncoder.Save(fileStream);
+
+                }
+            }
+            catch (IOException ex) // Wird geworfen, wenn Datei aus anderem Format, jedoch mit selbem Dateinamen gleichzeitig von einem anderen Thread konvertiert bzw. erzeugt wird
+            {
+                ConvertToTiff(counter++);
             }
         }
-        private void ConvertToTiff()
+        private void ConvertToGif(int counter=1)
         {
             string fileName = Path.GetFileNameWithoutExtension(filePath);
-            string fullName = Path.Combine(savingPath, fileName + "." + format.ToLower());
+            string fullName;
+            if (counter == 0)
+            {
+                fullName = Path.Combine(savingPath, fileName + "." + format.ToLower());
+            }
+            else
+            {
+                fullName = Path.Combine(savingPath, fileName + "(" + counter + ")." + format.ToLower());
+
+            }
+            GifBitmapEncoder gifBitmapEncoder = new GifBitmapEncoder();
+            BitmapImage bi = new BitmapImage();
+            // BitmapImage.UriSource must be in a BeginInit/EndInit block.
+            bi.BeginInit();
+            bi.UriSource = new Uri(filePath, UriKind.RelativeOrAbsolute);
+            bi.EndInit();
+            try
+            {
+                using (var fileStream = new FileStream(fullName, FileMode.Create))
+                {
+                    gifBitmapEncoder.Frames.Add(BitmapFrame.Create(bi));
+                    gifBitmapEncoder.Save(fileStream);
+
+                }
+            }
+            catch (IOException ex) // Wird geworfen, wenn Datei aus anderem Format, jedoch mit selbem Dateinamen gleichzeitig von einem anderen Thread konvertiert bzw. erzeugt wird
+            {
+                ConvertToTiff(counter++);
+            }
+        }
+        private void ConvertToTiff(int counter=1)
+        {
+            string fileName = Path.GetFileNameWithoutExtension(filePath);
+            string fullName;
+            if (counter == 1)
+            {
+                fullName = Path.Combine(savingPath, fileName + "." + format.ToLower());
+            }
+            else
+            {
+                fullName = Path.Combine(savingPath, fileName + "(" + counter + ")." + format.ToLower());
+
+            }
             TiffBitmapEncoder tiffBitmapEncoder = new TiffBitmapEncoder();
             BitmapImage bi = new BitmapImage();
             // BitmapImage.UriSource must be in a BeginInit/EndInit block.
             bi.BeginInit();
             bi.UriSource = new Uri(filePath, UriKind.RelativeOrAbsolute);
             bi.EndInit();
-            using (var fileStream = new FileStream(fullName, FileMode.Create))
+            try
             {
-                tiffBitmapEncoder.Frames.Add(BitmapFrame.Create(bi));
-                tiffBitmapEncoder.Save(fileStream);
+                using (var fileStream = new FileStream(fullName, FileMode.Create))
+                {
+                    tiffBitmapEncoder.Frames.Add(BitmapFrame.Create(bi));
+                    tiffBitmapEncoder.Save(fileStream);
+                    
+                }
+            }
+            catch (IOException ex) // Wird geworfen, wenn Datei aus anderem Format, jedoch mit selbem Dateinamen gleichzeitig von einem anderen Thread konvertiert bzw. erzeugt wird
+            {
+                ConvertToTiff(++counter);
             }
         }
     }

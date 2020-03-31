@@ -10,6 +10,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -18,7 +19,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 
 namespace FileConverter.ViewModel
-{    
+{
     public class MainWindowViewModel : ViewModelBase
     {
         #region fields
@@ -154,7 +155,6 @@ namespace FileConverter.ViewModel
                 this.OnPropertyChanged("ZielformatVisibility");
             }
         }
-
         private string infoText = $"Bitte wähle deine Dateien aus,\roder ziehe sie links rein.";
         public string InfoText
         {
@@ -211,7 +211,7 @@ namespace FileConverter.ViewModel
             }
             set
             {
-                if (value!=-1)
+                if (value != -1)
                 {
                     ButtonVisibility = "Visible";
                     this.OnPropertyChanged(" ButtonVisibility");
@@ -344,8 +344,9 @@ namespace FileConverter.ViewModel
             Files.amountConvertedFiles++;
             ConvertingProgress = (int)((Convert.ToDouble(Files.amountConvertedFiles) / Files.amountOfFiles) * 100); // ConvertingProgress muss Zahl zwischen 0 und 100 zurückgeben
 
-            if (ConvertingProgress==100)
+            if (ConvertingProgress == 100)
             {
+                ConvertingFile = "Der Zielordner wurde auf deinem Desktop angelegt."; // TODO: Eigentlich ins View
                 CancelVisibility = "Hidden";
                 InfoText = "Konvertierung abgeschlossen.";
                 NewVisibility = "Visible";
@@ -360,8 +361,7 @@ namespace FileConverter.ViewModel
             ConvertingFile = file;
             Converter converter = new Converter(file, Formats.Current, savingPath);
             converter.Convert();
-
-            // TODO Frage: Wieso führt die Berechnung des ConvertProgress an dieser Stelle zu fehlern -> 99% bei vielen Dateien
+            
             // ConvertingProgress = (int)((Convert.ToDouble(Files.amountConvertedFiles) / Files.amountOfFiles) * 100); // ConvertingProgress muss Zahl zwischen 0 und 100 zurückgeben
         }
         /// <summary>
@@ -391,9 +391,29 @@ namespace FileConverter.ViewModel
                 ConvertingFile = "";
                 if (!CheckIfSupportedFormats(Files.FilePaths))
                 {
-                    MessageBox.Show("Das gewählte Dateiformat wird leider noch nicht unterstützt.", "Nicht unterstützte Formate");
+                    HandleDifferentFormats();
+                }
+            }
+            else
+            {
+                MessageBoxResult result = MessageBox.Show("Nicht alle deiner Dateien besitzen das selbe Format. Wollen Sie diese Aktion trotzdem durchführen?", "Abfrage", MessageBoxButton.YesNo);
+
+                if (result == MessageBoxResult.Yes)
+                {
+                    ZielformatVisibility = "Visible";
+                    InfoText = "";
+                    NewVisibility = "Hidden";
+                    ConvertingProgress = 0;
+                    ConvertingFile = "";
+                    if (!CheckIfSupportedFormats(Files.FilePaths))
+                    {
+                        HandleDifferentFormats();
+                    }
+                }
+                else
+                {
                     ZielformatVisibility = "Hidden";
-                    InfoText = "Beachte bitte die Dokumentation.";
+                    InfoText = "Bitte überprüfe deine Dateien.";
                     ButtonVisibility = "Hidden";
                     NewVisibility = "Visible";
                     Files.FilePaths.Clear();
@@ -401,17 +421,42 @@ namespace FileConverter.ViewModel
                     ConvertingFile = "";
                 }
             }
+        }
+
+        private void HandleDifferentFormats()
+        {
+            List<string> unsupportedFiles = GetUnsupportedFiles();
+            StringBuilder stringBuilder = new StringBuilder();
+            foreach (var file in unsupportedFiles)
+            {
+                stringBuilder.AppendLine("- "+Path.GetFileName(file).ToString());
+            }
+            MessageBoxResult result = MessageBox.Show("Eine oder mehrere deiner Dateien besitzen ein nicht unterstütztes Format:\n"+stringBuilder+"Soll die Konvertierung fortgeführt und die gelisteten Dateien übersprungen werden?", "Abfrage", MessageBoxButton.YesNo);
+            if (result == MessageBoxResult.Yes)
+            {
+                List<string> adjustedList = new List<string>();
+                foreach (var file in Files.FilePaths)
+                {
+                    if (!unsupportedFiles.Contains(Path.GetFullPath(file)))
+                    {
+                        adjustedList.Add(Path.GetFullPath(file));
+                    }
+                }
+                Files.FilePaths = adjustedList;
+                // Dateienanzeige aktualisieren
+                OFiles = new ObservableCollection<string>(GetNames(Files.FilePaths));
+
+            }
             else
             {
-                MessageBox.Show("Nicht alle deiner Dateien besitzen das selbe Format.", "Unterschiedliche Formate");
                 ZielformatVisibility = "Hidden";
-                InfoText = "Bitte überprüfe deine Dateien.";
+                InfoText = "Beachte bitte die Dokumentation.";
                 ButtonVisibility = "Hidden";
                 NewVisibility = "Visible";
                 Files.FilePaths.Clear();
                 ConvertingProgress = 0;
                 ConvertingFile = "";
-            }
+            }  
         }
 
         public void SearchFiles(string path)
@@ -458,7 +503,6 @@ namespace FileConverter.ViewModel
         {
             foreach (var file in filePaths)
             {
-                // TODO Erklärung: Zur Laufzeit werden irgendwo noch Dateien blockiert! Auch bei der zweiten Überpfrüfungsmethode? Halbes Workaround: Die erste Datei MUSS UMBEDINGT separat in eine Variable abgespeichert werden, damit diese wieder freigegeben wird. Wird im if durch FileNames.First() abgefragt, bleibt die erste datei zur Laufszeit des Programms gesperrt.
                 string firstFile = Files.FilePaths.First();
                 if (!Path.GetExtension(file).ToLower().Trim('.').Equals(Path.GetExtension(firstFile).ToLower().Trim('.'))) // Prüfen, ob alle Dateien das selbe Format besitzen
                 {
@@ -468,7 +512,8 @@ namespace FileConverter.ViewModel
             return true;
         }
         private bool CheckIfSupportedFormats(List<string> filePaths)
-        {string firstFile = Files.FilePaths.First();
+        {
+            string firstFile = Files.FilePaths.First();
             if (Formats.Contains(Path.GetExtension(firstFile).ToLower().Trim('.')))
             {
                 return true;
@@ -477,6 +522,18 @@ namespace FileConverter.ViewModel
             {
                 return false;
             }
+        }
+        private List<string> GetUnsupportedFiles()
+        {
+            List<string> unsupportedFiles = new List<string>();
+            foreach (var file in Files.FilePaths)
+            {
+                if (!Formats.Contains(Path.GetExtension(file).ToLower().Trim('.')))
+                {
+                    unsupportedFiles.Add(file);
+                }
+            }
+            return unsupportedFiles;
         }
         #endregion
 
