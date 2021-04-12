@@ -120,9 +120,6 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Images\Testbild.jpg" />
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="konvertieren.ico" />
   </ItemGroup>
   <ItemGroup>
@@ -170,6 +167,9 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="logo.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\cancel_mouseOver.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
